@@ -11,5 +11,5 @@
 program: decls EOF { $1 }
 
 decls:  { [], [] }
-  | decls vdecl 
+  | decls vdecl
   | decls fdecl
