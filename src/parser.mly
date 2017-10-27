@@ -1,22 +1,27 @@
 %{ open Ast %}
 
 %token <string> ID
+%token <string> STRING
 %token EOF
+%token LPAREN RPAREN SEMI
 
-%left SEMICOLON
-
-%start expr
-%type <Ast.expr> expr
+%start stmt
+%type <Ast.stmt> stmt
 
 %%
 
+/*program:  { [] }
+      | vdecl program
+      | fdecl program*/
+
+stmt: expr;
+
 expr: ID { Id($1) }
-  | LITERAL { Literal($1) }
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | INT_LITERAL { Literal($1) }
+  | ID LPAREN actual RPAREN { Call($1, $3) }
+  | LPAREN expr RPAREN { $2 }
+  | STRING_LITERAL { String($1) }
 
-actuals_opt:
+actual:
         { [] }
-  | actuals_list { List.rev $1 }
-
-actuals_list:
-  expr    { [$1] }
+  | expr

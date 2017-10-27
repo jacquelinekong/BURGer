@@ -5,18 +5,23 @@
 
 { open Parser }
 
+let escape = '\\' ['\\' ''' '"' 'n' 'r' 't']
+let ascii = ([' '-'!' '#'-'[' ']'-'~'])
+let string = '"' ( (ascii | escape)* as s) '"'
+
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf }
   | "/*" { comment lexbuf }
   | '(' { LPAREN }
   | ')' { RPAREN }
-
+  | ';' { SEMI }
+  | string { STRING_LITERAL(s) }
   (*
   | '{' { LBRACE }
   | '}' { RBRACE }
   | '[' { LBRACK }
   | ']' { RBRACK }
-  | ';' { SEMI }
+
   | ',' { COMMA }
   | '+' { PLUS }
   | '-' { MINUS }
