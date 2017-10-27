@@ -1,7 +1,7 @@
 (*
 * Authors:
 * Jordan Lee
-* )
+*)
 
 { open Parser }
 
@@ -11,7 +11,8 @@ rule token = parse
   | '(' { LPAREN }
   | ')' { RPAREN }
 
-  (*| '{' { LBRACE }
+  (*
+  | '{' { LBRACE }
   | '}' { RBRACE }
   | '[' { LBRACK }
   | ']' { RBRACK }
@@ -35,7 +36,8 @@ rule token = parse
   | "while" { WHILE }
   | "true" { TRUE }
   | "false" { FALSE }
-  | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }*)
+  | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
+*)
 
   | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
   | eof { EOF }

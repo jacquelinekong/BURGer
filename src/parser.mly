@@ -3,13 +3,20 @@
 %token <string> ID
 %token EOF
 
-%start program
-%type <Ast.program> program
+%left SEMICOLON
+
+%start expr
+%type <Ast.expr> expr
 
 %%
 
-program: decls EOF { $1 }
+expr: ID { Id($1) }
+  | LITERAL { Literal($1) }
+  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
 
-decls:  { [], [] }
-  | decls vdecl
-  | decls fdecl
+actuals_opt:
+        { [] }
+  | actuals_list { List.rev $1 }
+
+actuals_list:
+  expr    { [$1] }
