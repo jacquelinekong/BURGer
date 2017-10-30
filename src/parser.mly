@@ -14,14 +14,15 @@
       | vdecl program
       | fdecl program*/
 
-stmt: expr;
+stmt:
+    expr; { [] } /* TODO: fill in action */
 
-expr: ID { Id($1) }
-  | INT_LITERAL { Literal($1) }
+expr:
+    ID { Id($1) }
   | ID LPAREN actual RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
-  | STRING_LITERAL { String($1) }
+  | STRING { String($1) }
 
 actual:
         { [] }
-  | expr
+  | expr { [] } /* TODO: fill in action */
