@@ -16,6 +16,14 @@ type expr =
 type stmt =
     Expr of expr
 
+type func_decl = {
+    typ : typ;
+    fname : string;
+    formals : bind list;
+    locals : bind list;
+    body : stmt list;
+ }
+
 (* Functions for Printing *)
 let rec string_of_expr = function
     Literal(l) -> l

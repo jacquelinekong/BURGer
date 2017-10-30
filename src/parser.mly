@@ -14,14 +14,22 @@
       | vdecl program
       | fdecl program*/
 
+program:
+      stmt EOF { $1 } /* will only work for hello world */
+
+/* TODO */ 
+/*stmts_list:
+      stmt {}
+    | stmt stmts_list {}*/
+
 stmt:
-    expr SEMI { Expr $1 } /* TODO: fill in action */
+      expr SEMI { Expr $1 }
 
 expr:
-    ID { Id($1) }
-  | ID LPAREN expr RPAREN { Call($1, $3) }
-  | LPAREN expr RPAREN { $2 }
-  | STRING { String($1) }
+    ID { Id($1) } /* x */
+  | ID LPAREN expr RPAREN { Call($1, $3) } /* print("hello") */
+  | LPAREN expr RPAREN { $2 } /* (x) */
+  | STRING { String($1) } /* hello */
 
 /*actual:
         { [] }
