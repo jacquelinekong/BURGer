@@ -26,7 +26,7 @@ parser.ml parser.mli : parser.mly
 
 .PHONY : clean
 clean :
-	rm -f burger parser.ml parser.mli scanner.ml *.cmo *.cmi
+	rm -f burger parser.ml parser.mli scanner.ml *.cmo *.cmi parser.output
 
 calc.cmo: scanner.cmo parser.cmi ast.cmi
 calc.cmx: scanner.cmx parser.cmx ast.cmi

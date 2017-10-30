@@ -15,14 +15,14 @@
       | fdecl program*/
 
 stmt:
-    expr; { [] } /* TODO: fill in action */
+    expr SEMI { Expr $1 } /* TODO: fill in action */
 
 expr:
     ID { Id($1) }
-  | ID LPAREN actual RPAREN { Call($1, $3) }
+  | ID LPAREN expr RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | STRING { String($1) }
 
-actual:
+/*actual:
         { [] }
   | expr { [] } /* TODO: fill in action */

@@ -16,7 +16,7 @@ rule token = parse
   | '(' { LPAREN }
   | ')' { RPAREN }
   | ';' { SEMI }
-  | string { STRING_LITERAL(s) }
+  | string { STRING(s) }
   (*
   | '{' { LBRACE }
   | '}' { RBRACE }
