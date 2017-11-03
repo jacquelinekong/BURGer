@@ -1,6 +1,6 @@
 (* BURGer Programming Language Semantic Checker *)
 
-open Ast
+(* open Ast
 
 module StringMap = Map.Make(String)
 
@@ -48,4 +48,4 @@ let check =
 
 
   in
-  List.iter check_function functions
+  List.iter check_function functions *)
