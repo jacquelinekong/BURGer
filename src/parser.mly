@@ -5,8 +5,8 @@
 %token EOF
 %token LPAREN RPAREN SEMI
 
-%start stmt
-%type <Ast.stmt> stmt
+%start program
+%type <Ast.program> program
 
 %%
 
@@ -17,7 +17,7 @@
 program:
       stmt EOF { $1 } /* will only work for hello world */
 
-/* TODO */ 
+/* TODO */
 /*stmts_list:
       stmt {}
     | stmt stmts_list {}*/
