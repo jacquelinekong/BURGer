@@ -7,14 +7,17 @@
  *)
 
 (* Syntax Types *)
-type stmt =
-    Expr of expr
+type typ = Char | String | Void
+type bind = typ * string
 
 type expr =
     Id of string
   | Call of string * expr list
   | Literal of int
   | String of string
+
+type stmt =
+    Expr of expr
 
 type func_decl = {
     typ : typ;
@@ -23,6 +26,9 @@ type func_decl = {
     locals : bind list;
     body : stmt list;
  }
+
+ type program = stmt
+ (* in real life this will be statements mixed in with fdecls, etc *)
 
 (* Functions for Printing *)
 (* let rec string_of_expr = function
