@@ -5,7 +5,7 @@
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
 .PHONY : all
-all : burger.native printbig.o
+all : burger.native
 
 .PHONY : burger.native
 burger.native :
