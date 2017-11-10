@@ -28,10 +28,14 @@ parser.ml parser.mli : parser.mly
 clean :
 	rm -f burger parser.ml parser.mli scanner.ml *.cmo *.cmi parser.output
 
-calc.cmo: scanner.cmo parser.cmi ast.cmi
-calc.cmx: scanner.cmx parser.cmx ast.cmi
-parser.cmo: ast.cmi parser.cmi
-parser.cmx: ast.cmi parser.cmi
+ast.cmo :
+ast.cmx :
+codegen.cmo : ast.cmo
+codegen.cmx : ast.cmx
+burger.cmo: scanner.cmo parser.cmi codegen.cmo ast.cmo
+burger.cmx: scanner.cmx parser.cmx codegen.cmx ast.cmx
+parser.cmo: ast.cmo parser.cmi
+parser.cmx: ast.cmx parser.cmi
 scanner.cmo: parser.cmi
 scanner.cmx: parser.cmx
-parser.cmi: ast.cmi
+parser.cmi: ast.cmo
