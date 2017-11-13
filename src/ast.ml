@@ -18,6 +18,7 @@ type expr =
 
 type stmt =
     Expr of expr
+  | Block of stmt list
 
 (* type func_decl = {
     typ : typ;
@@ -27,8 +28,9 @@ type stmt =
     body : stmt list;
  } *)
 
- type program = stmt
- (* in real life this will be statements mixed in with fdecls, etc *)
+ type program =
+    stmt
+ (* TODO: in real life this will be statements mixed in with fdecls, etc *)
 
 (* Functions for Printing *)
 (* let rec string_of_expr = function

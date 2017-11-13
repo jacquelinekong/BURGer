@@ -5,7 +5,7 @@
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
 .PHONY : all
-all : clean burger.native 
+all : clean burger.native
 
 .PHONY : burger.native
 burger.native :
@@ -17,7 +17,7 @@ burger.native :
 .PHONY : clean
 clean :
 	ocamlbuild -clean
-	rm -rf testall.log *.diff burger scanner.ml parser.ml parser.mli
+	rm -rf testall.log *.diff burger scanner.ml parser.ml parser.mli parser.output
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
