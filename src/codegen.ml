@@ -12,7 +12,8 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
-let translate (program) =
+(* passing in a program for hello world *)
+let translate (program) = (* QUESTION: will we always only pass in a program bc we allow top-level code? *)
   let context = L.global_context () in
   let the_module = L.create_module context "BURGer"
   and i8_t = L.i8_type context
@@ -28,9 +29,6 @@ let translate (program) =
   let printf_t = L.var_arg_function_type i8_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
-      (* Call L.define_function to create main function
-       * call L.builder_at_end to get builder for that functions
-       * call stmt function (below) with the builder and the program that was passed into translate *)
       let rec expr builder = function
             A.String s -> L.build_global_stringptr s "str" builder
           | A.Call ("print", [s]) -> L.build_call printf_func [| (expr builder s) |] "print" builder in
@@ -44,10 +42,3 @@ let translate (program) =
       stmt builder program;
       L.build_ret_void builder;
   the_module
-
-
-  (* NOTE: what types do we have, and how to encode those in LLVM?
-   * LLVM has pretty much all the types you need to implement C
-   * to figure out what your codegen needs to do, take a small example in your language
-   * and try to code it in C. If you can figure the types you need to do it in C, then it's
-   * a small jump to figure out how to do it in LLVM *)
