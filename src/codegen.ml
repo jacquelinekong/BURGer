@@ -37,6 +37,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
             A.Expr e -> ignore(expr builder e); builder in
 
       let ftype = L.function_type void_t [| |] in
+      (* Define main function so that we can have top-level code *)
       let funct = L.define_function "main" ftype the_module in
       let builder = L.builder_at_end context (L.entry_block funct) in
       stmt builder program;
