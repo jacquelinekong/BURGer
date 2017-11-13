@@ -30,7 +30,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   let printf_func = L.declare_function "printf" printf_t the_module in
 
       let rec expr builder = function
-            A.String s -> L.build_global_stringptr s "str" builder
+            A.StringLit s -> L.build_global_stringptr s "str" builder
           | A.Call ("print", [s]) -> L.build_call printf_func [| (expr builder s) |] "print" builder in
 
       let stmt builder = function

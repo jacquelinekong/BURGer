@@ -13,19 +13,19 @@ type bind = typ * string
 type expr =
     Id of string
   | Call of string * expr list
-  | Literal of int
-  | String of string
+  | IntLit of int
+  | StringLit of string
 
 type stmt =
     Expr of expr
 
-type func_decl = {
+(* type func_decl = {
     typ : typ;
     fname : string;
     formals : bind list;
     locals : bind list;
     body : stmt list;
- }
+ } *)
 
  type program = stmt
  (* in real life this will be statements mixed in with fdecls, etc *)

@@ -29,7 +29,7 @@ expr:
     ID { Id($1) } /* x */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) } /* print("hello") */
   | LPAREN expr RPAREN { $2 } /* (x) */
-  | STRING { String($1) } /* hello */
+  | STRING { StringLit($1) } /* hello */
 
 actuals_opt:
     /* nothing */ { [] }
