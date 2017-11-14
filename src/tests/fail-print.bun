@@ -1,0 +1,4 @@
+print(print("hi"));
+print();
+print(hello);
+
