@@ -17,13 +17,13 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   let context = L.global_context () in
   let the_module = L.create_module context "BURGer"
   and i8_t = L.i8_type context
-  and str_t = L.pointer_type (L.i8_type context)
+  (* and str_t = L.pointer_type (L.i8_type context) *)
   and void_t = L.void_type context in
 
-  let ltype_of_typ = function
+  (* let ltype_of_typ = function
       A.Char -> i8_t
     | A.String -> str_t
-    | A.Void -> void_t in
+    | A.Void -> void_t in *)
 
   (* printf() declaration *)
   let printf_t = L.var_arg_function_type i8_t [| L.pointer_type i8_t |] in

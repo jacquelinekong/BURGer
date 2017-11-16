@@ -20,6 +20,8 @@ type stmt =
     Expr of expr
   | Block of stmt list
 
+type vdecl =
+    
 (* type func_decl = {
     typ : typ;
     fname : string;
@@ -29,7 +31,7 @@ type stmt =
  } *)
 
  type program =
-    stmt
+
  (* TODO: in real life this will be statements mixed in with fdecls, etc *)
 
 (* Functions for Printing *)
