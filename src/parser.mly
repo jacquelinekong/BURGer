@@ -2,67 +2,55 @@
 
 %token <string> ID
 %token <string> STRING
-%token EOF
 %token LPAREN RPAREN SEMI LBRACE RBRACE LBRACK RBRACK COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN /*fix this precedence later*/
 %token EQ NEQ LEQ GEQ
 %token AND OR NOT
 %token IF ELSE
 %token TRUE FALSE
-%token FOR WHILE
+%token FOR WHILE DEF
+%token EOF
 
 %start program
 %type <Ast.program> program
 
 %%
 
-program:  block EOF {}
+program: stmt_list EOF { $1 }
 
-block: { [] }  
-  | stmt_list block {}
-  | fdecl block {}
+/*num: ID { Id($1) }
+  | constant {}*/
 
-/*program:
-      stmt EOF { $1 } /* will only work for hello world */
+stmt_list: { [] }
+  | stmt_list stmt { ($2 :: $1) }
+
+formals: ID {}
+  | formals COMMA ID {}
+
+fdecl: DEF ID LPAREN formals RPAREN LBRACE stmt_list RBRACE {}
+
+vdecl: ID SEMI {}
+
+stmt: expr SEMI { Expr $1 }
+  | fdecl { Function($1) }
+  | vdecl { VDecl $1 }
 
 
-num: id { Id($1) }
-  | constant {}
-
-fdecl: def id LPAREN formals RPAREN LBRACE stmt_list RBRACE {}
-
-formals: id {}
-  | formals COMMA id {}
-
-vdecls: vdecls {}
-  | vdecls vdecl {}
-
-vdecl: ID ; {}
-
-stmt:
-      expr SEMI { Expr $1 }
-  | vdecl
-
-stmt_list: stmt {}
-  | stmt_list stmt { $2 :: $1 }
-
-expr:
-    ID { Id($1) } /* x */
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) } /* print("hello") */
+expr: ID LPAREN actuals_opt RPAREN { Call($1, $3) } /* print("hello") */
   | LPAREN expr RPAREN { $2 } /* (x) */
   | STRING { StringLit($1) } /* hello */
 
-cast_expr: char LPAREN num RPAREN {}
+/*cast_expr: char LPAREN num RPAREN {}
   | int LPAREN num RPAREN {}
-  | float LPAREN num RPAREN {}
+  | float LPAREN num RPAREN {}*/
 
 actuals_opt:
-    /* nothing */ { [] }
+      { [] }
   | actuals_list  { List.rev $1 }
 
 actuals_list:
     expr                    { [$1] }
-  /*| actuals_list COMMA expr { $3 :: $1 }*/
+  | actuals_list COMMA expr { $3 :: $1 }
 
 
 /*actual:

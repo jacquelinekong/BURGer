@@ -16,12 +16,6 @@ type expr =
   | IntLit of int
   | StringLit of string
 
-type stmt =
-    Expr of expr
-  | Block of stmt list
-
-type vdecl =
-
 type func_decl = {
     typ : typ;
     fname : string;
@@ -30,7 +24,12 @@ type func_decl = {
     body : stmt list;
  }
 
- type program =
+type stmt =
+      Expr of expr
+    | VDecl of bind
+    | Function of func_decl
+
+ type program = stmt list
 
  (* TODO: in real life this will be statements mixed in with fdecls, etc *)
 
