@@ -16,22 +16,18 @@
 
 %%
 
-program:  block EOF { $1 }
-
-block: { [] }
-  | block stmt_list { ($2 :: $1) }
-  /*| block fdecl { ($2 :: $1) }*/
+program: stmt_list EOF { $1 }
 
 /*num: ID { Id($1) }
   | constant {}*/
 
-/*formals: ID {}
+stmt_list: { [] }
+  | stmt_list stmt { ($2 :: $1) }
+
+formals: ID {}
   | formals COMMA ID {}
 
 fdecl: DEF ID LPAREN formals RPAREN LBRACE stmt_list RBRACE {}
-
-fdecl_list: fdecl { Function($1) }
-  | fdecl_list fdecl { ($2 :: $1) }*/
 
 /*vdecls: vdecls {}
   | vdecls vdecl {}*/
@@ -39,10 +35,9 @@ fdecl_list: fdecl { Function($1) }
 /*vdecl: ID ; {}*/
 
 stmt: expr SEMI { Expr $1 }
+  | fdecl { Function($1) }
   /*| vdecl {}*/
 
-stmt_list:
-    stmt_list stmt { ($2 :: $1) }
 
 expr:
     ID { Id($1) } /* x */

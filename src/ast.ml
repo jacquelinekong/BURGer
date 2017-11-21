@@ -16,23 +16,20 @@ type expr =
   | IntLit of int
   | StringLit of string
 
-type stmt =
-    Expr of expr
-
-type block =
-    Statements stmt list
-  | Functions func_decl list
-
-
-(* type func_decl = {
+type func_decl = {
     typ : typ;
     fname : string;
     formals : bind list;
     locals : bind list;
     body : stmt list;
- } *)
+ }
 
- type program = block list
+type stmt =
+      Expr of expr
+    | VDecl of bind
+    | Function of func_decl
+
+ type program = stmt list
 
  (* TODO: in real life this will be statements mixed in with fdecls, etc *)
 
