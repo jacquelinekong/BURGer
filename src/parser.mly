@@ -18,16 +18,13 @@
 
 program:  block EOF {}
 
-block:  stmt_list program {}
-  | fdecl program {}
+block: { [] }  
+  | stmt_list block {}
+  | fdecl block {}
 
 /*program:
-      stmt EOF { $1 } /* will only work for hello world */*/
+      stmt EOF { $1 } /* will only work for hello world */
 
-/* TODO */
-/*stmts_list:
-      stmt {}
-    | stmt stmts_list {}*/
 
 num: id { Id($1) }
   | constant {}
@@ -44,6 +41,10 @@ vdecl: ID ; {}
 
 stmt:
       expr SEMI { Expr $1 }
+  | vdecl
+
+stmt_list: stmt {}
+  | stmt_list stmt { $2 :: $1 }
 
 expr:
     ID { Id($1) } /* x */

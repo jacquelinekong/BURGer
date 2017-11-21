@@ -21,7 +21,7 @@ type stmt =
   | Block of stmt list
 
 type vdecl =
-    
+
 (* type func_decl = {
     typ : typ;
     fname : string;
@@ -30,7 +30,7 @@ type vdecl =
     body : stmt list;
  } *)
 
- type program =
+ type program = stmt_list
 
  (* TODO: in real life this will be statements mixed in with fdecls, etc *)
 
