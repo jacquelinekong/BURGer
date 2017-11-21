@@ -22,15 +22,15 @@ type stmt =
 
 type vdecl =
 
-(* type func_decl = {
+type func_decl = {
     typ : typ;
     fname : string;
     formals : bind list;
     locals : bind list;
     body : stmt list;
- } *)
+ }
 
- type program = stmt_list
+ type program =
 
  (* TODO: in real life this will be statements mixed in with fdecls, etc *)
 
