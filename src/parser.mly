@@ -16,10 +16,10 @@
 
 %%
 
-program:  stmt_list EOF { $1 }
+program:  block EOF { $1 }
 
-/*block: { [] }
-  | block stmt_list { ($2 :: $1) }*/
+block: { [] }
+  | block stmt_list { ($2 :: $1) }
   /*| block fdecl { ($2 :: $1) }*/
 
 /*num: ID { Id($1) }
@@ -42,8 +42,7 @@ stmt: expr SEMI { Expr $1 }
   /*| vdecl {}*/
 
 stmt_list:
-    { [] }
-  | stmt_list stmt { ($2 :: $1) }
+    stmt_list stmt { ($2 :: $1) }
 
 expr:
     ID { Id($1) } /* x */
