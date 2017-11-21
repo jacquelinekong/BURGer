@@ -18,9 +18,11 @@ type expr =
 
 type stmt =
     Expr of expr
-  | Block of stmt list
 
-type vdecl =
+type block =
+    Statements stmt list
+  | Functions func_decl list
+
 
 (* type func_decl = {
     typ : typ;
@@ -30,7 +32,7 @@ type vdecl =
     body : stmt list;
  } *)
 
- type program = stmt_list
+ type program = block list
 
  (* TODO: in real life this will be statements mixed in with fdecls, etc *)
 
