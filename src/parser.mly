@@ -29,19 +29,14 @@ formals: ID {}
 
 fdecl: DEF ID LPAREN formals RPAREN LBRACE stmt_list RBRACE {}
 
-/*vdecls: vdecls {}
-  | vdecls vdecl {}*/
-
-/*vdecl: ID ; {}*/
+vdecl: ID SEMI {}
 
 stmt: expr SEMI { Expr $1 }
   | fdecl { Function($1) }
-  /*| vdecl {}*/
+  | vdecl { VDecl $1 }
 
 
-expr:
-    ID { Id($1) } /* x */
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) } /* print("hello") */
+expr: ID LPAREN actuals_opt RPAREN { Call($1, $3) } /* print("hello") */
   | LPAREN expr RPAREN { $2 } /* (x) */
   | STRING { StringLit($1) } /* hello */
 
