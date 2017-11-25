@@ -1,13 +1,14 @@
-(*
- * Abstract Syntax Tree and functions for printing it
+(* Abstract Syntax Tree
  * BURGer Programming Language
  * PLT Fall 2017
  * Authors:
  * Jacqueline Kong
- *)
+ * Jordan Lee
+ * Adrian Traviezo
+ * Ashley Nguyen *)
 
 (* Syntax Types *)
-type typ = Char | String | Void
+type typ = Int | Float | Bool | Char | String | Void
 type bind = typ * string
 
 type expr =

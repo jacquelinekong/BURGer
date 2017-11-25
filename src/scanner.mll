@@ -12,38 +12,44 @@ let string = '"' ( (ascii | escape)* as s) '"'
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf }
-  | "/*" { comment lexbuf }
-  | '(' { LPAREN }
-  | ')' { RPAREN }
-  | ';' { SEMI }
-  | string { STRING(s) }
-  | '{' { LBRACE }
-  | '}' { RBRACE }
-  | '[' { LBRACK }
-  | ']' { RBRACK }
-  | ',' { COMMA }
-  | '+' { PLUS }
-  | '-' { MINUS }
-  | '*' { TIMES }
-  | '/' { DIVIDE }
-  | '=' { ASSIGN }
-  | "==" { EQ }
-  | "!=" { NEQ }
-  | "<=" { LEQ }
-  | ">=" { GEQ }
-  | "&&" { AND }
-  | "||" { OR }
-  | "!" { NOT }
-  | "if" { IF }
-  | "else" { ELSE }
-  | "for" { FOR }
-  | "while" { WHILE }
-  | "true" { TRUE }
-  | "false" { FALSE }
-  | "def" { DEF }
-  | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
-  | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
-  | eof { EOF }
+  | "/*"               { comment lexbuf }
+  | '('                { LPAREN }
+  | ')'                { RPAREN }
+  | ';'                { SEMI }
+  | string             { STRING(s) }
+  | '{'                { LBRACE }
+  | '}'                { RBRACE }
+  | '['                { LBRACK }
+  | ']'                { RBRACK }
+  | ','                { COMMA }
+  | '+'                { PLUS }
+  | '-'                { MINUS }
+  | '*'                { TIMES }
+  | '/'                { DIVIDE }
+  | '='                { ASSIGN }
+  | "=="               { EQ }
+  | "!="               { NEQ }
+  | "<="               { LEQ }
+  | ">="               { GEQ }
+  | "&&"               { AND }
+  | "||"               { OR }
+  | "!"                { NOT }
+  | "if"               { IF }
+  | "else"             { ELSE }
+  | "for"              { FOR }
+  | "while"            { WHILE }
+  | "true"             { TRUE }
+  | "false"            { FALSE }
+  | "int"              { INT }
+  | "float"            { FLOAT }
+  | "char"             { CHAR }
+  | "String"           { STRING }
+  | "bool"             { BOOL }
+  | "void"             { VOID }
+  | ['0'-'9']+ as lxm  { LITERAL(int_of_string lxm) }
+  | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*
+                as lxm { ID(lxm) }
+  | eof                { EOF }
 
 and comment = parse
-  "*/" { token lexbuf }
+  "*/"                 { token lexbuf }
