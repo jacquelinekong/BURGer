@@ -20,6 +20,10 @@ clean :
 	rm -rf testall.log *.diff burger scanner.ml parser.ml parser.mli parser.output
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
 
+.PHONY : parser
+parser :
+	ocamlyacc -v parser.mly
+	
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
 OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx burger.cmx

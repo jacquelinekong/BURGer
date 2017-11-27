@@ -9,7 +9,8 @@
 %{ open Ast %}
 
 %token <string> ID
-%token <string> STRING
+%token <string> STRINGLIT
+%token <int> INTLIT
 %token LPAREN RPAREN SEMI LBRACE RBRACE LBRACK RBRACK COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN /* TODO: fix this precedence later in CFG */
 %token EQ NEQ LEQ GEQ
@@ -17,7 +18,7 @@
 %token IF ELSE
 %token TRUE FALSE
 %token INT FLOAT CHAR STRING BOOL VOID
-%token FOR WHILE DEF
+%token FOR WHILE DEF RETURN
 %token EOF
 
 %start program
@@ -46,7 +47,9 @@ typ:
   | VOID   { Void }
 
 stmt:
-  expr SEMI { Expr $1 }
+    expr SEMI        { Expr $1 }
+  | RETURN SEMI      { Return NoExpr }
+  | RETURN expr SEMI { Return $2 }
 
 stmt_list:
     /* nothing */  { [] }
@@ -55,18 +58,28 @@ stmt_list:
 expr:
     ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN           { $2 }
-  | STRING                       { StringLit($1) }
+  | STRINGLIT                    { StringLit($1) }
+  | INTLIT                       { IntLit($1) }
+  | TRUE                         { BoolLit(true) }
+  | FALSE                        { BoolLit(false) }
+  | ID                           { Id($1) }
+
+/*arith_expr:*/
+/*
+addsub_expr:
+    expr PLUS  expr { Binop($1, Add, $3) }
+  | expr MINUS expr { Binop($1, Sub, $3) }*/
 
 vdecl:
   typ ID SEMI { ($1, $2) }
 
 fdecl:
-  typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
-    { { typ = $1;
-        fname = $2;
-        formals = $4;
+  DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+    { { typ = $2;
+        fname = $3;
+        formals = $5;
         locals = ;
-        body = $7;
+        body = $8;
       } } /* TODO: need to re-evaluate fdecl for BURGer */
 
 formals_opt:

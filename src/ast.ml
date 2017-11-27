@@ -8,14 +8,24 @@
  * Ashley Nguyen *)
 
 (* Syntax Types *)
+type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
+          And | Or
+
+type uop = Neg | Not
+
 type typ = Int | Float | Bool | Char | String | Void
+
 type bind = typ * string
 
 type expr =
     Id of string
   | Call of string * expr list
   | IntLit of int
+  | BoolLit of bool
   | StringLit of string
+  | Binop of expr * op * expr
+  | Unop of uop * expr
+  | NoExpr
 
 type stmt =
     Expr of expr
