@@ -16,7 +16,7 @@ rule token = parse
   | '('                { LPAREN }
   | ')'                { RPAREN }
   | ';'                { SEMI }
-  | string             { STRING(s) }
+  | string             { STRINGLIT(s) }
   | '{'                { LBRACE }
   | '}'                { RBRACE }
   | '['                { LBRACK }
@@ -46,7 +46,8 @@ rule token = parse
   | "String"           { STRING }
   | "bool"             { BOOL }
   | "void"             { VOID }
-  | ['0'-'9']+ as lxm  { LITERAL(int_of_string lxm) }
+  | "return"           { RETURN }
+  | ['0'-'9']+ as lxm  { INTLIT(int_of_string lxm) }
   | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*
                 as lxm { ID(lxm) }
   | eof                { EOF }
