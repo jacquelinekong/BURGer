@@ -35,7 +35,6 @@ item_list:
 
 item:
     stmt          { Stmt($1) }
-  | vdecl         { VDecl($1) }
   | fdecl         { Function($1) }
 
 typ:
@@ -48,6 +47,7 @@ typ:
 
 stmt:
     expr SEMI        { Expr $1 }
+  | vdecl SEMI       { VDecl($1) }
   | RETURN SEMI      { Return NoExpr }
   | RETURN expr SEMI { Return $2 }
 
@@ -71,7 +71,7 @@ addsub_expr:
   | expr MINUS expr { Binop($1, Sub, $3) }*/
 
 vdecl:
-  typ ID SEMI { ($1, $2) }
+  typ ID { ($1, $2) }
 
 fdecl:
   DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
