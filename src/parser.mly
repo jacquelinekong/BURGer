@@ -59,10 +59,23 @@ expr:
     ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN           { $2 }
   | STRINGLIT                    { StringLit($1) }
-  | INTLIT                       { IntLit($1) }
   | TRUE                         { BoolLit(true) }
   | FALSE                        { BoolLit(false) }
   | ID                           { Id($1) }
+  | arith_expr                   { $1 }
+
+num:
+    INTLIT { IntLit($1) }
+
+term:
+    num { $1 }
+  | term TIMES num { Binop($1, Mult, $3) }
+  | term DIVIDE num { Binop($1, Div, $3) }
+
+arith_expr:
+    term { $1 }
+  | arith_expr PLUS term { Binop($1, Add, $3) }
+  | arith_expr MINUS term { Binop($1, Sub, $3) }
 
 /*arith_expr:*/
 /*
