@@ -16,18 +16,18 @@ type expr =
   | IntLit of int
   | StringLit of string
 
-type func_decl = {
+type stmt =
+      Expr of expr
+    | VDecl of bind
+    | Function of func_decl
+and
+func_decl = {
     typ : typ;
     fname : string;
     formals : bind list;
     locals : bind list;
     body : stmt list;
- }
-
-type stmt =
-      Expr of expr
-    | VDecl of bind
-    | Function of func_decl
+}
 
  type program = stmt list
 
