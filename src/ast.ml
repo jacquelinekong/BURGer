@@ -13,7 +13,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Float | Bool | Char | String | Void
+type typ = Int | Bool | Char | String | Null
 
 type bind = typ * string
 
