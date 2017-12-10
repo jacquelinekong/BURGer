@@ -29,6 +29,7 @@ type expr =
 
 type stmt =
     Expr of expr
+  | VDecl of bind
 
 type func_decl = {
     typ : typ;
@@ -40,7 +41,6 @@ type func_decl = {
 
 type item =
       Stmt of stmt
-    | VDecl of bind
     | Function of func_decl
 
  type program = item list

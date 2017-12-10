@@ -33,13 +33,18 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
             A.StringLit s -> L.build_global_stringptr s "str" builder
           | A.Call ("print", [s]) -> L.build_call printf_func [| (expr builder s) |] "print" builder in
 
-      let stmt builder = function
+      let rec stmt builder = function
             A.Expr e -> ignore(expr builder e); builder in
+
+      let rec item builder = function
+            A.Stmt st -> ignore(stmt builder st); builder in
+
+      let prgm builder = ignore()
 
       let ftype = L.function_type void_t [| |] in
       (* Define main function so that we can have top-level code *)
       let funct = L.define_function "main" ftype the_module in
       let builder = L.builder_at_end context (L.entry_block funct) in
-      stmt builder program;
+      item builder program;
       L.build_ret_void builder;
   the_module

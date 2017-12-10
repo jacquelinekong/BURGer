@@ -8,7 +8,7 @@
 
 let escape = '\\' ['\\' ''' '"' 'n' 'r' 't']
 let ascii = ([' '-'!' '#'-'[' ']'-'~'])
-let string = '"' ( (ascii | escape)* as s) '"'
+let string = ('"'|''') ( (ascii | escape)* as s) ('"'|''')
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf }
