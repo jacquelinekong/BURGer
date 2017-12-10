@@ -13,11 +13,11 @@
 %token <int> INTLIT
 %token LPAREN RPAREN SEMI LBRACE RBRACE LBRACK RBRACK COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN /* TODO: fix this precedence later in CFG */
-%token EQ NEQ LEQ GEQ
+%token EQ NEQ LEQ GEQ LT GT
 %token AND OR NOT
 %token IF ELSE
 %token TRUE FALSE
-%token INT FLOAT CHAR STRING BOOL VOID
+%token INT FLOAT CHAR STRING BOOL NULL
 %token FOR WHILE DEF RETURN
 %token EOF
 
@@ -43,7 +43,7 @@ typ:
   | BOOL   { Bool }
   | CHAR   { Char }
   | STRING { String }
-  | VOID   { Void }
+  | NULL   { Null }
 
 stmt:
     expr SEMI        { Expr $1 }
@@ -59,23 +59,42 @@ expr:
     ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN           { $2 }
   | STRINGLIT                    { StringLit($1) }
-  | TRUE                         { BoolLit(true) }
-  | FALSE                        { BoolLit(false) }
   | ID                           { Id($1) }
   | arith_expr                   { $1 }
+  | bool_expr                    { $1 }
 
-num:
-    INTLIT { IntLit($1) }
+bool_expr:
+    bool_expr  AND   bool_term   { Binop($1, And,   $3) }
+  | bool_expr  OR    bool_term   { Binop($1, Or,    $3) }
+  | bool_term                    { $1 }
 
-term:
-    num { $1 }
-  | term TIMES num { Binop($1, Mult, $3) }
-  | term DIVIDE num { Binop($1, Div, $3) }
+bool_term:
+    bool_lit                     { $1 }
+  | comp_expr                    { $1 }
+  | arith_expr EQ    arith_expr  { Binop($1, Equal, $3) }
+  /*| STRINGLIT  EQ    STRINGLIT   { Binop($1, Equal, $3) }*/
+  | arith_expr NEQ   arith_expr  { Binop($1, Neq,   $3) }
+  /*| STRINGLIT  EQ    STRINGLIT   { Binop($1, Neq,   $3) }*/
+
+bool_lit:
+    TRUE                         { BoolLit(true) }
+  | FALSE                        { BoolLit(false) }
+
+comp_expr:
+    arith_expr LT    arith_expr  { Binop($1, Less,  $3) }
+  | arith_expr LEQ   arith_expr  { Binop($1, Leq,   $3) }
+  | arith_expr GT    arith_expr  { Binop($1, Greater, $3) }
+  | arith_expr GEQ   arith_expr  { Binop($1, Geq,   $3) }
 
 arith_expr:
-    term { $1 }
-  | arith_expr PLUS term { Binop($1, Add, $3) }
-  | arith_expr MINUS term { Binop($1, Sub, $3) }
+    arith_term { $1 }
+  | arith_expr PLUS arith_term { Binop($1, Add, $3) }
+  | arith_expr MINUS arith_term { Binop($1, Sub, $3) }
+
+arith_term:
+    INTLIT { $1 }
+  | arith_term TIMES INTLIT { Binop($1, Mult, $3) }
+  | arith_term DIVIDE INTLIT { Binop($1, Div, $3) }
 
 /*arith_expr:*/
 /*
