@@ -34,8 +34,8 @@ item_list:
   | item_list item { ($2 :: $1) }
 
 item:
-    stmt          { Stmt($1) }
-  | fdecl         { Function($1) }
+    stmt  { Stmt($1) }
+  | fdecl { Function($1) }
 
 typ:
     INT    { Int }
@@ -48,12 +48,17 @@ typ:
 stmt:
     expr SEMI        { Expr $1 }
   | vdecl SEMI       { VDecl($1) }
-  | RETURN SEMI      { Return NoExpr }
-  | RETURN expr SEMI { Return $2 }
+  | RETURN expr SEMI { [] }
+  | RETURN SEMI      { }
 
 stmt_list:
     /* nothing */  { [] }
   | stmt_list stmt { ($2 :: $1) }
+
+/*expr:
+    sub_expr        { $1 }
+  | RETURN sub_expr { $2 }
+  | RETURN          { [] } /* TODO: handle returns */
 
 expr:
     ID LPAREN actuals_opt RPAREN { Call($1, $3) }
@@ -64,31 +69,29 @@ expr:
   | bool_expr                    { $1 }
 
 bool_expr:
-    bool_expr  AND   bool_term   { Binop($1, And,   $3) }
-  | bool_expr  OR    bool_term   { Binop($1, Or,    $3) }
-  | bool_term                    { $1 }
+    bool_expr  AND   bool_term { Binop($1, And,   $3) }
+  | bool_expr  OR    bool_term { Binop($1, Or,    $3) }
+  | bool_term                  { $1 }
 
 bool_term:
-    bool_lit                     { $1 }
-  | comp_expr                    { $1 }
-  | arith_expr EQ    arith_expr  { Binop($1, Equal, $3) }
-  /*| STRINGLIT  EQ    STRINGLIT   { Binop($1, Equal, $3) }*/
-  | arith_expr NEQ   arith_expr  { Binop($1, Neq,   $3) }
-  /*| STRINGLIT  EQ    STRINGLIT   { Binop($1, Neq,   $3) }*/
+    bool_lit                      { $1 }
+  | arith_expr bool_op arith_expr { Binop($1, bool_op, $3) }
+
+bool_op:
+    EQ  { Equal }
+  | NEQ { Neq }
+  | LT    { Less }
+  | LEQ   { Leq }
+  | GT    { Greater }
+  | GEQ   { Geq }
 
 bool_lit:
-    TRUE                         { BoolLit(true) }
-  | FALSE                        { BoolLit(false) }
-
-comp_expr:
-    arith_expr LT    arith_expr  { Binop($1, Less,  $3) }
-  | arith_expr LEQ   arith_expr  { Binop($1, Leq,   $3) }
-  | arith_expr GT    arith_expr  { Binop($1, Greater, $3) }
-  | arith_expr GEQ   arith_expr  { Binop($1, Geq,   $3) }
+    TRUE  { BoolLit(true) }
+  | FALSE { BoolLit(false) }
 
 arith_expr:
-    arith_term { $1 }
-  | arith_expr PLUS arith_term { Binop($1, Add, $3) }
+    arith_term                  { $1 }
+  | arith_expr PLUS arith_term  { Binop($1, Add, $3) }
   | arith_expr MINUS arith_term { Binop($1, Sub, $3) }
 
 arith_term:
