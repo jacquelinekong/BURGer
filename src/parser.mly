@@ -38,8 +38,6 @@ item_list:
 item:
     stmt      { Stmt($1) }
   | fdecl     { Function($1) }
-  | cond_stmt { [] } /* TODO: fill in action */
-  | iter_stmt { [] } /* TODO: fill in action */
 
 typ:
     INT    { Int }
@@ -56,6 +54,8 @@ stmt:
   | vdecl SEMI       { VDecl($1) }
   | RETURN expr SEMI { [] } /* TODO: fill in action */
   | RETURN SEMI      { }    /* TODO: fill in action */
+  | cond_stmt        { [] } /* TODO: fill in action */
+  | iter_stmt        { [] } /* TODO: fill in action */
 
 stmt_list:
     /* nothing */  { [] }
@@ -76,7 +76,7 @@ cond_stmt:
 
 iter_stmt:
     WHILE LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE                          { [] } /* TODO: fill in action */
-  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { [] } /* TODO: fill in action */ 
+  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { [] } /* TODO: fill in action */
 
 /*** Expressions ***/
 
@@ -112,17 +112,28 @@ bool_lit:
   | FALSE { BoolLit(false) }
 
 /*** Arithmetic Expressions ***/
-/* TODO: arithmetic operators on strings */
 
 arith_expr:
     arith_term                  { $1 }
   | arith_expr PLUS arith_term  { Binop($1, Add, $3) }
   | arith_expr MINUS arith_term { Binop($1, Sub, $3) }
+  | STRINGLIT PLUS STRINGLIT    { [] }
 
 arith_term:
+    num { $1 }
+  | arith_term TIMES num  { Binop($1, Mult, $3) }
+  | arith_term DIVIDE num { Binop($1, Div, $3) }
+
+num:
     INTLIT { $1 }
-  | arith_term TIMES INTLIT { Binop($1, Mult, $3) }
-  | arith_term DIVIDE INTLIT { Binop($1, Div, $3) }
+  /*| ID     { $1 }*/
+
+/* want to be able to arbitrarily nest expressions */ 
+
+/*** Assignment Expressions ***/
+
+/*assign_expr:*/
+
 
 /*** Variable Declarations ***/
 
