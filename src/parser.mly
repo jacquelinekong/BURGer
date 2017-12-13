@@ -12,7 +12,7 @@
 %token <string> STRINGLIT
 %token <int> INTLIT
 %token LPAREN RPAREN SEMI LBRACE RBRACE LBRACK RBRACK COMMA
-%token PLUS MINUS TIMES DIVIDE ASSIGN /* TODO: fix this precedence later in CFG */
+%token PLUS MINUS TIMES DIVIDE ASSIGN
 %token EQ NEQ LEQ GEQ LT GT
 %token AND OR NOT
 %token IF ELSE
@@ -26,6 +26,8 @@
 
 %%
 
+/*** Top Level ***/
+
 program:
   item_list EOF { $1 }
 
@@ -34,8 +36,8 @@ item_list:
   | item_list item { ($2 :: $1) }
 
 item:
-    stmt  { Stmt($1) }
-  | fdecl { Function($1) }
+    stmt      { Stmt($1) }
+  | fdecl     { Function($1) }
 
 typ:
     INT    { Int }
@@ -45,20 +47,38 @@ typ:
   | STRING { String }
   | NULL   { Null }
 
+/*** Statements ***/
+
 stmt:
     expr SEMI        { Expr $1 }
   | vdecl SEMI       { VDecl($1) }
-  | RETURN expr SEMI { [] }
-  | RETURN SEMI      { }
+  | RETURN expr SEMI { [] } /* TODO: fill in action */
+  | RETURN SEMI      { }    /* TODO: fill in action */
+  | cond_stmt        { [] } /* TODO: fill in action */
+  | iter_stmt        { [] } /* TODO: fill in action */
 
 stmt_list:
     /* nothing */  { [] }
   | stmt_list stmt { ($2 :: $1) }
 
-/*expr:
-    sub_expr        { $1 }
-  | RETURN sub_expr { $2 }
-  | RETURN          { [] } /* TODO: handle returns */
+/*** Conditional Statements ***/
+
+cond_stmt:
+    IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE { [] } /* TODO: fill in action */
+  | IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE
+      ELSE LBRACE stmt_list RBRACE                     { [] } /* TODO: fill in action */
+  | IF LPAREN bool_expr RPAREN
+      LBRACE stmt_list RBRACE
+      ELSE IF LPAREN bool_expr RPAREN
+      LBRACE stmt_list RBRACE                          { [] } /* TODO: fill in action */
+
+/*** Loops ***/
+
+iter_stmt:
+    WHILE LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE                          { [] } /* TODO: fill in action */
+  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { [] } /* TODO: fill in action */
+
+/*** Expressions ***/
 
 expr:
     ID LPAREN actuals_opt RPAREN { Call($1, $3) }
@@ -67,6 +87,8 @@ expr:
   | ID                           { Id($1) }
   | arith_expr                   { $1 }
   | bool_expr                    { $1 }
+
+/*** Boolean Expressions ***/
 
 bool_expr:
     bool_expr  AND   bool_term { Binop($1, And,   $3) }
@@ -89,24 +111,36 @@ bool_lit:
     TRUE  { BoolLit(true) }
   | FALSE { BoolLit(false) }
 
+/*** Arithmetic Expressions ***/
+
 arith_expr:
     arith_term                  { $1 }
   | arith_expr PLUS arith_term  { Binop($1, Add, $3) }
   | arith_expr MINUS arith_term { Binop($1, Sub, $3) }
+  | STRINGLIT PLUS STRINGLIT    { [] }
 
 arith_term:
-    INTLIT { $1 }
-  | arith_term TIMES INTLIT { Binop($1, Mult, $3) }
-  | arith_term DIVIDE INTLIT { Binop($1, Div, $3) }
+    num { $1 }
+  | arith_term TIMES num  { Binop($1, Mult, $3) }
+  | arith_term DIVIDE num { Binop($1, Div, $3) }
 
-/*arith_expr:*/
-/*
-addsub_expr:
-    expr PLUS  expr { Binop($1, Add, $3) }
-  | expr MINUS expr { Binop($1, Sub, $3) }*/
+num:
+    INTLIT { $1 }
+  /*| ID     { $1 }*/
+
+/* want to be able to arbitrarily nest expressions */ 
+
+/*** Assignment Expressions ***/
+
+/*assign_expr:*/
+
+
+/*** Variable Declarations ***/
 
 vdecl:
   typ ID { ($1, $2) }
+
+/*** Function Declarations ***/
 
 fdecl:
   DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
@@ -132,14 +166,3 @@ actuals_opt:
 actuals_list:
     expr                    { [$1] }
   | actuals_list COMMA expr { $3 :: $1 }
-
-/*num: ID { Id($1) }
-  | constant {}*/
-
-/*cast_expr: char LPAREN num RPAREN {}
-  | int LPAREN num RPAREN {}
-  | float LPAREN num RPAREN {}*/
-
-/*actual:
-        { [] }
-  | expr { [] } /* TODO: fill in action */
