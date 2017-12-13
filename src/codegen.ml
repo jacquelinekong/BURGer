@@ -20,9 +20,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     and str_t = L.pointer_type (L.i8_type context)
     and null_t = L.void_type context
     and i1_t   = L.i1_type context
-    and i32_t  = L.i32_type context
-
-  in
+    and i32_t  = L.i32_type context in
 
   let ltype_of_typ = function
       A.Char -> i8_t
@@ -32,18 +30,90 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     | A.Bool -> i1_t
   in
 
+  (*the following function was potentially going to be used to check if an item
+  is a statement or not*)
+  (* let item_type = function
+      A.item -> A.Stmt
+    | A.item -> A.Function
+  in *)
+
+  let discern_items =
+    let stmt_list =
+      let stmts_as_items = List.filter (fun x -> x == A.Stmt) program
+(*List.filter to find all the statements, and then List.map to make them statements
+  because right now, you've just filtered a list of items but they're not stmts yet
+  and you need to make them stmts to pass them into the program.
+  The function should check if it's a statement and it needs to be passed the list of items.
+  Freddy has confirmed that you do need to pass "program" to it. I feel like the function
+  is no good though. But I am not sure.
+*)
+      in List.map (fun x -> x == A.Stmt ) stmt_list
+    in
+    let function_list =
+      let functions_as_items = List.filter (fun x -> x == A.Function) program
+      in List.map (fun x -> x == A.Function) function_list
+    in
+  in
+
+
+  (*after you figure out which items are statements, you need to go through the statements
+    and figure out which ones contain the variables*)
+
+let globals =
+  let global_vars =
+  let global_var m (t, n) =
+    let init = L.const_int (ltype_of_typ t) 0
+    in StringMap.add n (L.define_global n init the_module) m in
+  List.fold_left global_var StringMap.empty globals in
+
   (* printf() declaration *)
   let printf_t = L.var_arg_function_type i8_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
+
+  (* Define each function (arguments and return type) so we can call it *)
+  let function_decls =
+    let function_decl m fdecl =
+      let name = fdecl.A.fname
+      and formal_types = Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.A.formals) in
+      let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
+      StringMap.add name (L.define_function name ftype the_module, fdecl) m
+    in
+    List.fold_left function_decl StringMap.empty functions
+  in
+
+    (* Fill in the body of the given function *)
+  let build_function_body fdecl =
+    let (the_function, _) = StringMap.find fdecl.A.fname function_decls in
+    let builder = L.builder_at_end context (L.entry_block the_function) in
+
+    let local_vars =
+      let add_formal var_map (formal_type, formal_name) param = L.set_value_name formal_name param;
+      	let local = L.build_alloca (ltype_of_typ formal_type) formal_name builder in
+      	ignore (L.build_store param local builder);
+        StringMap.add formal_name local var_map
+      in
+
+      let add_local map (formal_type, formal_name) =
+        let local_var = L.build_alloca (ltype_of_typ formal_type) formal_name builder in
+        StringMap.add formal_name local_var map
+      in
+
+      let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.formals
+          (Array.to_list (L.params the_function)) in
+      List.fold_left add_local formals fdecl.A.locals in
+
+  let lookup n = try StringMap.find n local_vars
+                   with Not_found -> StringMap.find n global_vars
+  in
 
       let rec expr builder = function
         A.StringLit s -> L.build_global_stringptr s "str" builder
       | A.Call ("print", [s]) -> L.build_call printf_func [| (expr builder s) |] "print" builder
       | A.IntLit i -> L.const_int i32_t i
-          | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
-          | A.NoExpr -> L.const_int i32_t 0
-          | A.Id s -> L.build_load (lookup s) s builder
-          | A.Binop (e1, op, e2) ->
+      | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
+      | A.NoExpr -> L.const_int i32_t 0
+      | A.Id s -> L.build_load (lookup s) s builder
+      | A.Binop (e1, op, e2) ->
     	  let e1' = expr builder e1
     	  and e2' = expr builder e2 in
     	  (match op with
@@ -67,12 +137,12 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
             | A.Not     -> L.build_not) e' "tmp" builder *)
           (* | A.Assign (s, e) -> let e' = expr builder e in
     	                   ignore (L.build_store e' (lookup s) builder); e' *)
-          | A.Call (f, act) ->
-             let (fdef, fdecl) = StringMap.find f function_decls in
-    	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-    	 let result = (match fdecl.A.typ with A.Void -> ""
-                                                | _ -> f ^ "_result") in
-             L.build_call fdef (Array.of_list actuals) result builder
+      | A.Call (f, act) ->
+        let (fdef, fdecl) = StringMap.find f function_decls in
+  	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+  	 let result = (match fdecl.A.typ with A.Void -> ""
+                                              | _ -> f ^ "_result") in
+           L.build_call fdef (Array.of_list actuals) result builder
   in
 
       let rec stmt builder = function
@@ -111,14 +181,16 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       in *)
 
       let rec item builder = function
-            A.Stmt st -> ignore(stmt builder st); builder in
+        A.Stmt st -> ignore(stmt builder st); builder
+      | A.Function f -> build_function_body f
+      in
 
-      let prgm builder = ignore() in
+      (* let prgm builder = ignore() in *)
 
       let ftype = L.function_type null_t [| |] in
       (* Define main function so that we can have top-level code *)
       let funct = L.define_function "main" ftype the_module in
       let builder = L.builder_at_end context (L.entry_block funct) in
-      item builder program;
+      List.iter item builder program;
       L.build_ret_void builder; (*List.iter buildprogrambody items; this is one of the first functions we define*)
       the_module
