@@ -37,9 +37,9 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     | A.item -> A.Function
   in *)
 
-  let discern_items =
-    let stmt_list =
-      let stmts_as_items = List.filter (fun x -> x == A.Stmt) program
+  (* let discern_items = function
+    A.Stmt ->
+  | A.Function ->  *)
 (*List.filter to find all the statements, and then List.map to make them statements
   because right now, you've just filtered a list of items but they're not stmts yet
   and you need to make them stmts to pass them into the program.
@@ -47,20 +47,25 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   Freddy has confirmed that you do need to pass "program" to it. I feel like the function
   is no good though. But I am not sure.
 *)
-      in List.map (fun x -> x == A.Stmt ) stmt_list
+  let discern_items =
+    let stmt_list = (* TODO: pull out other kinds of statements *)
+      let stmts_as_items =
+        List.filter (fun x -> x == A.Stmt) program
+
+      in List.map (fun x -> x = A.Stmt ) stmt_as_items
     in
-    let function_list =
+    (*after you figure out which items are statements, you need to go through the statements
+      and figure out which ones contain the variables*)
+    let globals =
+      List.filter (fun x -> x == A.VDecl) stmt_list
+    in List.map (fun x -> A.VDecl) globals
+
+    let functions =
       let functions_as_items = List.filter (fun x -> x == A.Function) program
-      in List.map (fun x -> x == A.Function) function_list
+      in List.map (fun x -> x = A.Function) function_as_items
     in
-    
   in
 
-
-  (*after you figure out which items are statements, you need to go through the statements
-    and figure out which ones contain the variables*)
-
-let globals =
   let global_vars =
   let global_var m (t, n) =
     let init = L.const_int (ltype_of_typ t) 0
@@ -181,10 +186,10 @@ let globals =
   	    ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
       in *)
 
-      let rec item builder = function
+      (* let rec item builder = function
         A.Stmt st -> ignore(stmt builder st); builder
       | A.Function f -> build_function_body f
-      in
+      in *)
 
       (* let prgm builder = ignore() in *)
 

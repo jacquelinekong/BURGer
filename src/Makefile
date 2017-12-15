@@ -23,7 +23,11 @@ clean :
 .PHONY : parser
 parser :
 	ocamlyacc -v parser.mly
-	
+
+.PHONY : menhir
+menhir:
+	menhir --interpret --interpret-show-cst parser.mly
+
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
 OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx burger.cmx
