@@ -1,0 +1,6 @@
+def math(int a, int b, int c){
+	int r = a*(b+c);
+	}
+int x = math(3, 2, 4);
+print(x);
+

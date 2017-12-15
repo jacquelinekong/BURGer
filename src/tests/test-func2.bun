@@ -1,9 +1,7 @@
-func testPrint(int a, double b, char c, string d){
+def void testPrint(int a, double b, char c, string d){
 	print(a);
 	print(b);
 	print(c);
 	print(d);
 	}
 testPrint(4, 3.54, "c", "hello");
-
-
