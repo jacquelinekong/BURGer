@@ -52,8 +52,8 @@ typ:
 stmt:
     expr SEMI        { Expr $1 }
   | vdecl SEMI       { VDecl($1) }
-  | RETURN expr SEMI { Return($2) } /* TODO: fill in action */
-  | RETURN SEMI      { Return(NULL) }    /* TODO: fill in action */
+  | RETURN expr SEMI { Return($2) }
+  | RETURN SEMI      { Return(NULL) }
   | cond_stmt        { [] } /* TODO: fill in action */
   | iter_stmt        { [] } /* TODO: fill in action */
 
@@ -64,9 +64,9 @@ stmt_list:
 /*** Conditional Statements ***/
 
 cond_stmt:
-    IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE { [] } /* TODO: fill in action */
+    IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE { If($3, $6, []) } /* TODO: fill in action */
   | IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE
-      ELSE LBRACE stmt_list RBRACE                     { [] } /* TODO: fill in action */
+      ELSE LBRACE stmt_list RBRACE                     { If($3, $6, $10) } /* TODO: fill in action */
   | IF LPAREN bool_expr RPAREN
       LBRACE stmt_list RBRACE
       ELSE IF LPAREN bool_expr RPAREN

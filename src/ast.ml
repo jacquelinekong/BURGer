@@ -32,6 +32,7 @@ type stmt =
     Expr of expr
   | VDecl of bind
   | Return of expr
+  | If of expr * stmt list * stmt list
 
 type func_decl = {
     typ : typ;
