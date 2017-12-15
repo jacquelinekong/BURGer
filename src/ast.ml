@@ -30,6 +30,7 @@ type expr =
 type stmt =
     Expr of expr
   | VDecl of bind
+  | Return of expr
 
 type func_decl = {
     typ : typ;
@@ -43,7 +44,7 @@ type item =
       Stmt of stmt
     | Function of func_decl
 
- type program = item list
+type program = item list
 
  (* TODO: in real life this will be statements mixed in with fdecls, etc *)
 

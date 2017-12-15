@@ -52,8 +52,8 @@ typ:
 stmt:
     expr SEMI        { Expr $1 }
   | vdecl SEMI       { VDecl($1) }
-  | RETURN expr SEMI { [] } /* TODO: fill in action */
-  | RETURN SEMI      { }    /* TODO: fill in action */
+  | RETURN expr SEMI { Return($2) } /* TODO: fill in action */
+  | RETURN SEMI      { Return(NULL) }    /* TODO: fill in action */
   | cond_stmt        { [] } /* TODO: fill in action */
   | iter_stmt        { [] } /* TODO: fill in action */
 
@@ -82,9 +82,8 @@ iter_stmt:
 
 expr:
     ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | LPAREN expr RPAREN           { $2 }
-  | STRINGLIT                    { StringLit($1) }
-  | ID                           { Id($1) }
+  /* | LPAREN expr RPAREN           { $2 } */
+  /* | ID                           { Id($1) } */
   | arith_expr                   { $1 }
   | bool_expr                    { $1 }
 
@@ -100,8 +99,8 @@ bool_term:
   | arith_expr bool_op arith_expr { Binop($1, bool_op, $3) }
 
 bool_op:
-    EQ  { Equal }
-  | NEQ { Neq }
+    EQ    { Equal }
+  | NEQ   { Neq }
   | LT    { Less }
   | LEQ   { Leq }
   | GT    { Greater }
@@ -114,21 +113,22 @@ bool_lit:
 /*** Arithmetic Expressions ***/
 
 arith_expr:
-    arith_term                  { $1 }
-  | arith_expr PLUS arith_term  { Binop($1, Add, $3) }
-  | arith_expr MINUS arith_term { Binop($1, Sub, $3) }
-  | STRINGLIT PLUS STRINGLIT    { [] }
+    arith_term                   { $1 }
+  | arith_expr PLUS  arith_term  { Binop($1, Add, $3) }
+  | arith_expr MINUS arith_term  { Binop($1, Sub, $3) }
 
 arith_term:
-    num { $1 }
-  | arith_term TIMES num  { Binop($1, Mult, $3) }
-  | arith_term DIVIDE num { Binop($1, Div, $3) }
+    lit                     { $1 }
+  | arith_term TIMES  lit   { Binop($1, Mult, $3) }
+  | arith_term DIVIDE lit   { Binop($1, Div, $3) }
 
-num:
-    INTLIT { $1 }
-  /*| ID     { $1 }*/
+lit:
+    INTLIT                   { $1 }
+  | ID                       { $1 }
+  | STRINGLIT                { StringLit($1) }
+  | LPAREN expr RPAREN { $2 }
 
-/* want to be able to arbitrarily nest expressions */ 
+/* want to be able to arbitrarily nest expressions */
 
 /*** Assignment Expressions ***/
 

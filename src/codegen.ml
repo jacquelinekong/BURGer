@@ -47,7 +47,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   Freddy has confirmed that you do need to pass "program" to it. I feel like the function
   is no good though. But I am not sure.
 *)
-      in List.map (fun x -> x == A.Stmt ) stmt_list
+      in List.map (fun x -> x == A.Stmt ) stmts_as_items
     in
     let function_list =
       let functions_as_items = List.filter (fun x -> x == A.Function) program
