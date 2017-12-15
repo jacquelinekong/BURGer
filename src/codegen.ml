@@ -37,30 +37,38 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     | A.item -> A.Function
   in *)
 
-  let discern_items =
-    let stmt_list =
-      let stmts_as_items = List.filter (fun x -> x == A.Stmt) program
+  (* let discern_items = function
+    A.Stmt ->
+  | A.Function ->  *)
 (*List.filter to find all the statements, and then List.map to make them statements
   because right now, you've just filtered a list of items but they're not stmts yet
   and you need to make them stmts to pass them into the program.
   The function should check if it's a statement and it needs to be passed the list of items.
   Freddy has confirmed that you do need to pass "program" to it. I feel like the function
-  is no good though. But I am not sure.
-*)
-      in List.map (fun x -> x == A.Stmt ) stmts_as_items
-    in
-    let function_list =
-      let functions_as_items = List.filter (fun x -> x == A.Function) program
-      in List.map (fun x -> x == A.Function) function_list
-    in
-
+  is no good though. But I am not sure.*)
+  let stmt_list = (* TODO: pull out other kinds of statements *)
+    let stmts_as_items =
+      List.filter (fun x -> match x with
+            A.Stmt(x) -> true
+          | _ -> false
+        ) program
+    in List.map (fun x -> print_string "x") stmts_as_items in
+  (* in
+  (*after you figure out which items are statements, you need to go through the statements
+    and figure out which ones contain the variables*)
+  let globals =
+    let global_list = List.filter (fun x -> x == A.VDecl) stmt_list
+    in List.map (fun x -> A.VDecl) global_list
   in
 
+  let functions =
+    let functions_as_items = List.filter (fun x -> x == A.Function) program
+    in List.map (fun x -> x = A.Function) function_as_items
+  in
 
   (*after you figure out which items are statements, you need to go through the statements
     and figure out which ones contain the variables*)
 
-let globals =
   let global_vars =
   let global_var m (t, n) =
     let init = L.const_int (ltype_of_typ t) 0
@@ -194,4 +202,5 @@ let globals =
       let builder = L.builder_at_end context (L.entry_block funct) in
       List.iter item builder program;
       L.build_ret_void builder; (*List.iter buildprogrambody items; this is one of the first functions we define*)
+     in*)
       the_module

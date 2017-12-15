@@ -1,6 +1,6 @@
 (* Semantic checking for the MicroC compiler *)
 
-open Ast
+(* open Ast
 
 module StringMap = Map.Make(String)
 
@@ -157,4 +157,4 @@ let check (globals, functions) =
     stmt (Block func.body)
 
   in
-  List.iter check_function functions
+  List.iter check_function functions *)

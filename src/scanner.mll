@@ -47,7 +47,7 @@ rule token = parse
   | "char"             { CHAR }
   | "String"           { STRING }
   | "bool"             { BOOL }
-  | "void"             { VOID }
+  | "null"             { NULL }
   | "return"           { RETURN }
   | ['0'-'9']+ as lxm  { INTLIT(int_of_string lxm) }
   | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*

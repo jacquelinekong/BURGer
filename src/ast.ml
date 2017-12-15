@@ -37,7 +37,7 @@ type func_decl = {
     typ : typ;
     fname : string;
     formals : bind list;
-    locals : bind list;
+    (* locals : bind list; *)
     body : stmt list;
  }
 

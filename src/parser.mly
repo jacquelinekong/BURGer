@@ -41,7 +41,6 @@ item:
 
 typ:
     INT    { Int }
-  | FLOAT  { Float }
   | BOOL   { Bool }
   | CHAR   { Char }
   | STRING { String }
@@ -53,36 +52,38 @@ stmt:
     expr SEMI        { Expr $1 }
   | vdecl SEMI       { VDecl($1) }
   | RETURN expr SEMI { Return($2) } /* TODO: fill in action */
-  | RETURN SEMI      { Return(NULL) }    /* TODO: fill in action */
-  | cond_stmt        { [] } /* TODO: fill in action */
-  | iter_stmt        { [] } /* TODO: fill in action */
+  | RETURN SEMI      { Return(NoExpr)}    /* TODO: fill in action */
+  | cond_stmt        { $1 } /* TODO: fill in action */
+  | iter_stmt        { $1 } /* TODO: fill in action */
 
 stmt_list:
     /* nothing */  { [] }
   | stmt_list stmt { ($2 :: $1) }
 
 /*** Conditional Statements ***/
+/*TODO: fill in all actions*/
 
 cond_stmt:
-    IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE { [] } /* TODO: fill in action */
+    IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE { [] }
   | IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE
-      ELSE LBRACE stmt_list RBRACE                     { [] } /* TODO: fill in action */
+      ELSE LBRACE stmt_list RBRACE                     { [] }
   | IF LPAREN bool_expr RPAREN
       LBRACE stmt_list RBRACE
       ELSE IF LPAREN bool_expr RPAREN
-      LBRACE stmt_list RBRACE                          { [] } /* TODO: fill in action */
+      LBRACE stmt_list RBRACE                          { [] }
 
 /*** Loops ***/
+/*TODO fill in all actions*/
 
 iter_stmt:
-    WHILE LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE                          { [] } /* TODO: fill in action */
-  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { [] } /* TODO: fill in action */
+    WHILE LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE                          { [] }
+  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { [] }
 
 /*** Expressions ***/
 
 expr:
-  /* | LPAREN expr RPAREN           { $2 } */
-  /* | ID                           { Id($1) } */
+   | LPAREN expr RPAREN           { $2 }
+   | ID                           { Id($1) }
   | arith_expr                   { $1 }
   | bool_expr                    { $1 }
   | ID ASSIGN expr               { Assign($1, $3) }
@@ -96,7 +97,7 @@ bool_expr:
 
 bool_term:
     bool_lit                      { $1 }
-  | arith_expr bool_op arith_expr { Binop($1, bool_op, $3) }
+  | arith_expr bool_op arith_expr { Binop($1, $2, $3) }
 
 bool_op:
     EQ    { Equal }
@@ -131,14 +132,14 @@ atom:
 
 /*** Assignment Expressions ***/
 
-/* assign_expr:
-    ID ASSIGN  {  } */
+ assign_expr:
+    ID ASSIGN  {  }
 
 /*** Variable Declarations ***/
 
 vdecl:
   typ ID { ($1, $2) }
-/* | typ assign_expr { $1, $2 } */
+ | typ assign_expr { $1, $2 }
 
 /*** Function Declarations ***/
 
@@ -147,12 +148,11 @@ fdecl:
     { { typ = $2;
         fname = $3;
         formals = $5;
-        locals = ;
         body = $8;
       } } /* TODO: need to re-evaluate fdecl for BURGer */
 
 formals_opt:
-    /* nothing */ { [] }
+    { [] }
   | formal_list   { List.rev $1 }
 
 formal_list:
@@ -160,7 +160,7 @@ formal_list:
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
 actuals_opt:
-    /* nothing */ { [] }
+     { [] }
   | actuals_list  { List.rev $1 }
 
 actuals_list:
