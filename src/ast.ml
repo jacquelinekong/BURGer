@@ -23,6 +23,7 @@ type expr =
   | IntLit of int
   | BoolLit of bool
   | StringLit of string
+  | Assign of string * expr
   | Binop of expr * op * expr
   | Unop of uop * expr
   | NoExpr

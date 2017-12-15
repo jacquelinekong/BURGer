@@ -81,11 +81,11 @@ iter_stmt:
 /*** Expressions ***/
 
 expr:
-    ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   /* | LPAREN expr RPAREN           { $2 } */
   /* | ID                           { Id($1) } */
   | arith_expr                   { $1 }
   | bool_expr                    { $1 }
+  | ID ASSIGN expr               { Assign($1, $3) }
 
 /*** Boolean Expressions ***/
 
@@ -118,27 +118,27 @@ arith_expr:
   | arith_expr MINUS arith_term  { Binop($1, Sub, $3) }
 
 arith_term:
-    lit                     { $1 }
-  | arith_term TIMES  lit   { Binop($1, Mult, $3) }
-  | arith_term DIVIDE lit   { Binop($1, Div, $3) }
+    atom                     { $1 }
+  | arith_term TIMES  atom   { Binop($1, Mult, $3) }
+  | arith_term DIVIDE atom   { Binop($1, Div, $3) }
 
-lit:
-    INTLIT                   { $1 }
-  | ID                       { $1 }
-  | STRINGLIT                { StringLit($1) }
-  | LPAREN expr RPAREN { $2 }
-
-/* want to be able to arbitrarily nest expressions */
+atom:
+    INTLIT                       { $1 }
+  | ID                           { $1 }
+  | STRINGLIT                    { StringLit($1) }
+  | LPAREN expr RPAREN           { $2 }
+  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
 
 /*** Assignment Expressions ***/
 
-/*assign_expr:*/
-
+/* assign_expr:
+    ID ASSIGN  {  } */
 
 /*** Variable Declarations ***/
 
 vdecl:
   typ ID { ($1, $2) }
+/* | typ assign_expr { $1, $2 } */
 
 /*** Function Declarations ***/
 
