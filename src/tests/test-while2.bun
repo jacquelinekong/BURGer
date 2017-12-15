@@ -1,0 +1,12 @@
+def int idk(int a){
+	int i = 0;
+	int j = 0;
+	while(i<a){
+		i++;
+		j=j+2;
+	}
+	return j;
+}
+
+int r = idk(5);
+print(r);
