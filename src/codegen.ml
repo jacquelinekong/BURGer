@@ -52,7 +52,9 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
             A.Stmt(x) -> true
           | _ -> false
         ) program
-    in List.map (fun x -> A.Stmt(x)) stmts_as_items
+    in List.map (fun x -> match x with
+          A.Stmt(x) -> x
+        | _ -> failwith "this didn't work") stmts_as_items
   in
 
   (*after you figure out which items are statements, you need to go through the statements
