@@ -49,26 +49,31 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   let stmt_list = (* TODO: pull out other kinds of statements *)
     let stmts_as_items =
       List.filter (fun x -> match x with
-            A.Stmt(x) -> true
-          | _ -> false
-        ) program
+        A.Stmt(x) -> true
+        | _ -> false) program
     in List.map (fun x -> match x with
-          A.Stmt(x) -> x
-        | _ -> failwith "this didn't work") stmts_as_items
+        A.Stmt(x) -> x
+        | _ -> failwith "stmt casting didn't work") stmts_as_items
   in
 
   (*after you figure out which items are statements, you need to go through the statements
     and figure out which ones contain the variables*)
   let globals =
     let global_list = List.filter (fun x -> match x with
-          A.VDecl(x) -> true
-        | _ -> false) stmt_list
-    in List.map (fun x -> A.VDecl) global_list
+        A.VDecl(x) -> true
+      | _ -> false) stmt_list
+    in List.map (fun x -> match x with
+        A.VDecl(x) -> x
+      | _ -> failwith "not turned into global") global_list
   in
 
   let functions =
-    let functions_as_items = List.filter (fun x -> x == A.Function) program
-    in List.map (fun x -> x = A.Function) function_as_items
+    let functions_as_items = List.filter (fun x -> match x with
+          A.Function(x) -> true
+        | _ -> false) program
+    in List.map (fun x -> match x with
+          A.Function(x) -> x
+        | _ -> failwith "function casting didn't work") functions_as_items
   in
 
   (*after you figure out which items are statements, you need to go through the statements
