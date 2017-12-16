@@ -142,7 +142,7 @@ vdecl:
 /*** Function Declarations ***/
 
 fdecl:
-  DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt RBRACE
+  DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
     { { typ = $2;
         fname = $3;
         formals = $5;
