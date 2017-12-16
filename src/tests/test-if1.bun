@@ -1,0 +1,11 @@
+def bool check(){
+	if(4>3){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+bool x = check();
+print(x);

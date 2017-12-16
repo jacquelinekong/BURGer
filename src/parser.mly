@@ -32,12 +32,14 @@ program:
   item_list EOF { $1 }
 
 item_list:
-    /* nothing */  { [] }
+   item { [$1] }
   | item_list item { ($2 :: $1) }
 
 item:
     stmt      { Stmt($1) }
   | fdecl     { Function($1) }
+  /*| stmt item { Stmt($1) :: $2 }
+  | fdecl item { Function($1) :: $2 }*/
 
 typ:
     INT    { Int }
@@ -64,27 +66,25 @@ stmt_list:
 /*TODO: fill in all actions*/
 
 cond_stmt:
-    IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE { [] }
+    IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE { If($3, $6, []) } /* TODO: fill in action */
   | IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE
-      ELSE LBRACE stmt_list RBRACE                     { [] }
+      ELSE LBRACE stmt_list RBRACE                     { If($3, $6, $10) } /* TODO: fill in action */
   | IF LPAREN bool_expr RPAREN
       LBRACE stmt_list RBRACE
       ELSE IF LPAREN bool_expr RPAREN
-      LBRACE stmt_list RBRACE                          { [] }
+      LBRACE stmt_list RBRACE                          { If($3, $6, $14) }
 
 /*** Loops ***/
 /*TODO fill in all actions*/
 
 iter_stmt:
-    WHILE LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE                          { [] }
-  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { [] }
+    WHILE LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE                          { While($3, $6) }
+  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { For($3, $5, $7, $10) }
 
 /*** Expressions ***/
 
 expr:
-   | LPAREN expr RPAREN           { $2 }
-   | ID                           { Id($1) }
-  | arith_expr                   { $1 }
+    arith_expr                   { $1 }
   | bool_expr                    { $1 }
   | ID ASSIGN expr               { Assign($1, $3) }
 
@@ -124,22 +124,22 @@ arith_term:
   | arith_term DIVIDE atom   { Binop($1, Div, $3) }
 
 atom:
-    INTLIT                       { $1 }
-  | ID                           { $1 }
+    INTLIT                       { IntLit($1) }
+  | ID                           { Id($1) }
   | STRINGLIT                    { StringLit($1) }
   | LPAREN expr RPAREN           { $2 }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
 
 /*** Assignment Expressions ***/
 
- assign_expr:
-    ID ASSIGN  {  }
+ /*assign_expr:
+    ID ASSIGN  {  }*/
 
 /*** Variable Declarations ***/
 
 vdecl:
   typ ID { ($1, $2) }
- | typ assign_expr { $1, $2 }
+ /*| typ assign_expr { $1, $2 }*/
 
 /*** Function Declarations ***/
 

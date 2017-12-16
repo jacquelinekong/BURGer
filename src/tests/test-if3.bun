@@ -1,0 +1,9 @@
+if(true){
+	print("hi");
+	if(true){
+		print("idk");
+		if(false){
+			print("what");
+		}
+	}
+}

@@ -1,4 +1,4 @@
-func add(int a, int b){
+def int add(int a, int b){
 	int r;
 	r = a+b;
 	return r;
@@ -6,4 +6,3 @@ func add(int a, int b){
 
 a = (46, 32);
 print(a);
-
