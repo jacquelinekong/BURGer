@@ -25,10 +25,11 @@ type expr =
   | BoolLit of bool
   | StringLit of string
   | Assign of string * expr
+  (* | VAssign of bind * expr *)
   | Binop of expr * op * expr
   | Unop of uop * expr
   | NoExpr
-  | VAssign of bind * expr
+
 
 type stmt =
     Block of stmt list
