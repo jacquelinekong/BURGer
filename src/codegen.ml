@@ -119,7 +119,21 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.formals
           (Array.to_list (L.params the_function)) in
-      List.fold_left add_local formals fdecl.A.locals in
+
+      let function_locals =
+        let get_locals_from_fbody function_body =
+          let get_vdecl locals_list stmt = match stmt with
+              A.VDecl(typ, string) -> (
+                if List.exists(fun (local_typ, local_string) -> local_string = string) locals_list
+                then failwith ("duplicate local " ^ string ^ " in function " ^ fdecl.A.fname)
+                else (typ, string) :: locals_list
+              )
+              | _ -> locals_list
+          in
+          List.fold_left get_vdecl [] function_body
+        in get_locals_from_fbody fdecl.A.body
+      in List.fold_left add_local formals function_locals
+    in
 
   let lookup n = try StringMap.find n local_vars
                    with Not_found -> StringMap.find n global_vars
@@ -159,7 +173,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       | A.Call (f, act) ->
         let (fdef, fdecl) = StringMap.find f function_decls in
   	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-  	 let result = (match fdecl.A.typ with A.Void -> ""
+  	 let result = (match fdecl.A.typ with A.Null -> ""
                                               | _ -> f ^ "_result") in
            L.build_call fdef (Array.of_list actuals) result builder
   in
@@ -212,5 +226,4 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       let builder = L.builder_at_end context (L.entry_block funct) in
       List.iter item builder program;
       L.build_ret_void builder; (*List.iter buildprogrambody items; this is one of the first functions we define*)
-in
       the_module

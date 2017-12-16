@@ -150,8 +150,8 @@ fdecl:
     { { typ = $2;
         fname = $3;
         formals = $5;
-        body = $8;
-      } } /* TODO: need to re-evaluate fdecl for BURGer */
+        body = Block($8);
+      } }
 
 formals_opt:
     { [] }
