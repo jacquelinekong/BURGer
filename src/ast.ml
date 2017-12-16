@@ -33,11 +33,11 @@ type stmt =
     Block of stmt list
   | Expr of expr
   | VDecl of bind
-  | VAssign of bind * expr 
+  | VAssign of bind * expr
   | Return of expr
   | If of expr * stmt * stmt
   | While of expr * stmt
-  | For of bind * expr * expr * stmt
+  | For of stmt * expr * expr * stmt list
 
 type func_decl = {
     typ : typ;
