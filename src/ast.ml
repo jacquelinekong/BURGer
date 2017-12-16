@@ -7,7 +7,8 @@
  * Adrian Traviezo
  * Ashley Nguyen *)
 
-(* Syntax Types *)
+(*** Syntax Types ***)
+
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
           And | Or
 
@@ -32,6 +33,7 @@ type stmt =
     Block of stmt list
   | Expr of expr
   | VDecl of bind
+  | VAssign of bind * expr 
   | Return of expr
   | If of expr * stmt * stmt
   | While of expr * stmt
@@ -49,6 +51,8 @@ type item =
     | Function of func_decl
 
 type program = item list
+
+(*** Functions for Printing ***)
 
 let string_of_typ = function
     Int -> "int"
@@ -94,13 +98,3 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s *)
-
- (* TODO: in real life this will be statements mixed in with fdecls, etc *)
-
-(* Functions for Printing *)
-(* let rec string_of_expr = function
-    Literal(l) -> l
-  | Id(s) -> s
-  | String(s) -> s
-  | Call(f, el) ->
-      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")" *)
