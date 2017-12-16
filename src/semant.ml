@@ -11,6 +11,15 @@ module StringMap = Map.Make(String)
 
 let check_program program =
 
+  (* Raise an exception if the given list has a duplicate *)
+  let report_duplicate exceptf list =
+    let rec helper = function
+        n1 :: n2 :: _ when n1 = n2 -> raise (Failure (exceptf n1))
+      | _ :: t -> helper t
+      | [] -> ()
+    in helper (List.sort compare list)
+  in
+
   let stmt_list =
     let stmts_as_items =
       List.filter (fun x -> match x with
@@ -32,10 +41,11 @@ let check_program program =
       | _ -> failwith "not turned into global") global_list
   in
 
-
     let symbols = List.fold_left (fun var_map (varType, varName) -> StringMap.add varName varType var_map)
       StringMap.empty (globals)
     in
+    (* line below moved to bottom *)
+    (* report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals); *)
 
     let type_of_identifier s =
       try StringMap.find s symbols
@@ -54,28 +64,19 @@ let check_program program =
       | Id s -> type_of_identifier s
       | Assign(var, e) as ex -> let lt = type_of_identifier var
                                 and rt = expr e in
-        check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
-             " = " ^ string_of_typ rt ^ " in " ^
-             string_of_expr ex))
+        check_assign lt rt (Failure ("Illegal assignment: " ^ string_of_typ lt ^
+             " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))
     in
 
     let check_stmt s = match s with
         VDecl _ -> print_string "is vdecl"
       | Expr e -> ignore (expr e)
     in
-    List.iter check_stmt stmt_list
-
+    (* Check for assignments and duplicate vdecls *)
+    List.iter check_stmt stmt_list;
 
 
 (*
-  (* Raise an exception if the given list has a duplicate *)
-  let report_duplicate exceptf list =
-    let rec helper = function
-	      n1 :: n2 :: _ when n1 = n2 -> raise (Failure (exceptf n1))
-      | _ :: t -> helper t
-      | [] -> ()
-    in helper (List.sort compare list)
-  in
 
 
   (* Raise an exception if a given binding is to a void type *)
@@ -84,11 +85,6 @@ let check_program program =
     | _ -> ()
   in
 
-  (* Raise an exception of the given rvalue type cannot be assigned to
-     the given lvalue type *)
-  let check_assign lvaluet rvaluet err =
-     if lvaluet == rvaluet then lvaluet else raise err
-  in
 
   (**** Checking Global Variables ****)
 
@@ -138,15 +134,6 @@ let check_program program =
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
       (List.map snd func.locals);
 
-    (* Type of each variable (global, formal, or local *)
-    let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-	StringMap.empty (globals @ func.formals @ func.locals )
-    in
-
-    let type_of_identifier s =
-      try StringMap.find s symbols
-      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
-    in
 
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
