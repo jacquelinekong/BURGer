@@ -226,30 +226,31 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
 
       (* | A.For (e1, e2, e3, body) -> stmt builder ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] ) *)
   in
-
-      (* let rec item builder = function
-        A.Stmt st -> ignore(stmt builder st); builder
-      | A.Function f -> build_function_body f
-      in
-
-      (* let prgm builder = ignore() in *)
-
-      let ftype = L.function_type null_t [| |] in
+      (* let ftype = L.function_type null_t [| |] in
       (* Define main function so that we can have top-level code *)
       let funct = L.define_function "main" ftype the_module in
       let builder = L.builder_at_end context (L.entry_block funct) in
       (* List.iter item builder program; *)
       L.build_ret_void builder; (*List.iter buildprogrambody items; this is one of the first functions we define*)
-         in the_module *)
-
+  in the_module  *)
+  (* let rec item builder = function
+      A.Stmt s -> ignore(stmt builder s); builder
+    | A.Function f -> build_function_body f
+  in *)
    (* Build the code for each statement in the function *)
-     let builder = stmt builder (A.Block fdecl.A.body) in
+  let builder = stmt builder (A.Block fdecl.A.body) in
 
      (* Add a return if the last block falls off the end *)
      add_terminal builder (match fdecl.A.typ with
          A.Null -> L.build_ret_void
        | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
-   in
+  in
+  (* List.iter build_function_body functions in *)
 
-   List.iter build_function_body functions;
-   the_module
+let ftype = L.function_type null_t [| |] in
+let funct = L.define_function "main" ftype the_module in
+let builder = L.builder_at_end context (L.entry_block funct) in
+
+List.iter build_function_body functions;
+L.build_ret_void builder;
+the_module
