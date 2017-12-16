@@ -183,7 +183,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
        have a terminal (e.g., a branch). *)
     let add_terminal builder f =
       match L.block_terminator (L.insertion_block builder) with
-	Some _ -> ()
+	     Some _ -> ()
       | None -> ignore (f builder) in
 
       let rec stmt builder = function
@@ -226,10 +226,10 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       (* | A.For (e1, e2, e3, body) -> stmt builder ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] ) *)
   in
 
-      let rec item builder = function
+      (* let rec item builder = function
         A.Stmt st -> ignore(stmt builder st); builder
       | A.Function f -> build_function_body f
-      in
+      in *)
 
       (* let prgm builder = ignore() in *)
 
@@ -237,6 +237,6 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       (* Define main function so that we can have top-level code *)
       let funct = L.define_function "main" ftype the_module in
       let builder = L.builder_at_end context (L.entry_block funct) in
-      List.iter item builder program;
+      (* List.iter item builder program; *)
       L.build_ret_void builder; (*List.iter buildprogrambody items; this is one of the first functions we define*)
       in the_module
