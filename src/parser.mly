@@ -150,7 +150,7 @@ fdecl:
     { { typ = $2;
         fname = $3;
         formals = $5;
-        body = Block($8);
+        body = List.rev $8);
       } }
 
 formals_opt:
