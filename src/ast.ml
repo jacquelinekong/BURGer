@@ -54,6 +54,8 @@ let string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
   | Null -> "null"
+  | Char -> "char"
+  | String -> "string"
 
 let string_of_op = function
     Add -> "+"
