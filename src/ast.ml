@@ -28,12 +28,12 @@ type expr =
   | Binop of expr * op * expr
   | Unop of uop * expr
   | NoExpr
+  | VAssign of bind * expr
 
 type stmt =
     Block of stmt list
   | Expr of expr
   | VDecl of bind
-  | VAssign of bind * expr
   | Return of expr
   | If of expr * stmt * stmt
   | While of expr * stmt

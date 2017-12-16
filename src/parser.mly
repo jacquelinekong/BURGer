@@ -88,6 +88,7 @@ iter_stmt:
 expr:
     arith_expr                   { $1 }
   | bool_expr                    { $1 }
+  | vassign                      { $1 }
   | ID ASSIGN expr               { Assign($1, $3) }
 
 /*** Boolean Expressions ***/
@@ -136,7 +137,9 @@ atom:
 
 vdecl:
     typ ID SEMI             { VDecl($1, $2) }
-  | typ ID ASSIGN expr SEMI {VAssign(($1, $2), $4)}
+
+vassign:
+   typ ID ASSIGN expr       { VAssign(($1, $2), $4) }
 
 /*** Function Declarations ***/
 
