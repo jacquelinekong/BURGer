@@ -1,6 +1,6 @@
 (* Semantic checking for the MicroC compiler *)
 
-(* open Ast
+open Ast
 
 module StringMap = Map.Make(String)
 
@@ -9,16 +9,74 @@ module StringMap = Map.Make(String)
 
    Check each global variable, then check each function *)
 
-let check (globals, functions) =
+let check_program program =
 
+  let stmt_list =
+    let stmts_as_items =
+      List.filter (fun x -> match x with
+        Ast.Stmt(x) -> true
+        | _ -> false) program
+    in List.map (fun x -> match x with
+        Ast.Stmt(x) -> x
+        | _ -> failwith "stmt casting didn't work") stmts_as_items
+  in
+
+  (*after you figure out which items are statements, you need to go through the statements
+    and figure out which ones contain the variables*)
+  let globals =
+    let global_list = List.filter (fun x -> match x with
+        Ast.VDecl(x) -> true
+      | _ -> false) stmt_list
+    in List.map (fun x -> match x with
+        Ast.VDecl(x) -> x
+      | _ -> failwith "not turned into global") global_list
+  in
+
+
+    let symbols = List.fold_left (fun var_map (varType, varName) -> StringMap.add varName varType var_map)
+      StringMap.empty (globals)
+    in
+
+    let type_of_identifier s =
+      try StringMap.find s symbols
+      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
+
+    (* Raise an exception of the given rvalue type cannot be assigned to
+       the given lvalue type *)
+    let check_assign lvaluet rvaluet err =
+       if lvaluet == rvaluet then lvaluet else raise err
+    in
+
+    let rec expr = function
+        IntLit _ -> Int
+      | BoolLit _ -> Bool
+      | Id s -> type_of_identifier s
+      | Assign(var, e) as ex -> let lt = type_of_identifier var
+                                and rt = expr e in
+        check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
+             " = " ^ string_of_typ rt ^ " in " ^
+             string_of_expr ex))
+    in
+
+    let check_stmt s = match s with
+        VDecl _ -> print_string "is vdecl"
+      | Expr e -> ignore (expr e)
+    in
+    List.iter check_stmt stmt_list
+
+
+
+(*
   (* Raise an exception if the given list has a duplicate *)
   let report_duplicate exceptf list =
     let rec helper = function
-	n1 :: n2 :: _ when n1 = n2 -> raise (Failure (exceptf n1))
+	      n1 :: n2 :: _ when n1 = n2 -> raise (Failure (exceptf n1))
       | _ :: t -> helper t
       | [] -> ()
     in helper (List.sort compare list)
   in
+
 
   (* Raise an exception if a given binding is to a void type *)
   let check_not_void exceptf = function
@@ -155,6 +213,4 @@ let check (globals, functions) =
     in
 
     stmt (Block func.body)
-
-  in
-  List.iter check_function functions *)
+*)

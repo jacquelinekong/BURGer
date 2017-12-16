@@ -60,9 +60,9 @@ stmt:
   | cond_stmt        { $1 } /* TODO: fill in action */
   | iter_stmt        { $1 } /* TODO: fill in action */
 
-/*stmt_list:
+stmt_list:
     stmt { [$1] }
-  | stmt_list stmt { ($2 :: $1) }*/
+  | stmt_list stmt { ($2 :: $1) }
 
 /*** Conditional Statements ***/
 /*TODO: fill in all actions*/
@@ -146,11 +146,11 @@ vdecl:
 /*** Function Declarations ***/
 
 fdecl:
-  DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt RBRACE
+  DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
     { { typ = $2;
         fname = $3;
         formals = $5;
-        body = Block($8);
+        body = List.rev $8;
       } }
 
 formals_opt:
