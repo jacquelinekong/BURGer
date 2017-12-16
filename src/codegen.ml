@@ -52,12 +52,15 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
             A.Stmt(x) -> true
           | _ -> false
         ) program
-    in List.map (fun x -> print_string "x") stmts_as_items in
-  (* in
+    in List.map (fun x -> A.Stmt(x)) stmts_as_items
+  in
+
   (*after you figure out which items are statements, you need to go through the statements
     and figure out which ones contain the variables*)
   let globals =
-    let global_list = List.filter (fun x -> x == A.VDecl) stmt_list
+    let global_list = List.filter (fun x -> match x with
+          A.VDecl(x) -> true
+        | _ -> false) stmt_list
     in List.map (fun x -> A.VDecl) global_list
   in
 
@@ -202,5 +205,5 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       let builder = L.builder_at_end context (L.entry_block funct) in
       List.iter item builder program;
       L.build_ret_void builder; (*List.iter buildprogrambody items; this is one of the first functions we define*)
-     in*)
+in
       the_module
