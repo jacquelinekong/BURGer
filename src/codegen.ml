@@ -93,7 +93,8 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   let function_decls =
     let function_decl m fdecl =
       let name = fdecl.A.fname
-      and formal_types = Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.A.formals) in
+      and formal_types = Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.A.formals)
+      in
       let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
       StringMap.add name (L.define_function name ftype the_module, fdecl) m
     in
@@ -119,7 +120,21 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.formals
           (Array.to_list (L.params the_function)) in
-      List.fold_left add_local formals fdecl.A.locals in
+
+      let function_locals =
+        let get_locals_from_fbody function_body =
+          let get_vdecl locals_list stmt = match stmt with
+              A.VDecl(typ, string) -> (
+                if List.exists(fun (local_typ, local_string) -> local_string = string) locals_list
+                then failwith ("duplicate local " ^ string ^ " in function " ^ fdecl.A.fname)
+                else (typ, string) :: locals_list
+              )
+              | _ -> locals_list
+          in
+          List.fold_left get_vdecl [] function_body
+        in get_locals_from_fbody fdecl.A.body
+      in List.fold_left add_local formals function_locals
+    in
 
   let lookup n = try StringMap.find n local_vars
                    with Not_found -> StringMap.find n global_vars
@@ -159,45 +174,57 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       | A.Call (f, act) ->
         let (fdef, fdecl) = StringMap.find f function_decls in
   	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-  	 let result = (match fdecl.A.typ with A.Void -> ""
+  	 let result = (match fdecl.A.typ with A.Null -> ""
                                               | _ -> f ^ "_result") in
            L.build_call fdef (Array.of_list actuals) result builder
   in
 
+  (* Invoke "f builder" if the current block doesn't already
+       have a terminal (e.g., a branch). *)
+    let add_terminal builder f =
+      match L.block_terminator (L.insertion_block builder) with
+	Some _ -> ()
+      | None -> ignore (f builder) in
+
       let rec stmt builder = function
-        A.Expr e -> ignore(expr builder e); builder in
+        A.Expr e -> ignore(expr builder e); builder
+      | A.Block sl -> List.fold_left stmt builder sl
+      (* | A.VDecl (typ, string) -> let e' = expr builder e in
+        ignore (L.build_store e' (var_lookup string) builder); builder *)
+      | A.Return e -> ignore (match fdecl.A.typ with
+          A.Null -> L.build_ret_void builder
+          | _ -> L.build_ret (expr builder e) builder); builder
+      | A.If (predicate, then_stmt, else_stmt) ->
+         let bool_val = expr builder predicate in
+      	 let merge_bb = L.append_block context "merge" the_function in
 
-        (* let merge_bb = L.append_block context "merge" the_function in
+      	 let then_bb = L.append_block context "then" the_function in
+      	 add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+      	   (L.build_br merge_bb);
 
-  	 let then_bb = L.append_block context "then" the_function in
-  	 add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
-  	   (L.build_br merge_bb);
+      	 let else_bb = L.append_block context "else" the_function in
+      	 add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
+      	   (L.build_br merge_bb);
 
-  	 let else_bb = L.append_block context "else" the_function in
-  	 add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
-  	   (L.build_br merge_bb);
+      	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
+         L.builder_at_end context merge_bb
+      | A.While (predicate, body) ->
+        let pred_bb = L.append_block context "while" the_function in
+        ignore (L.build_br pred_bb builder);
 
-  	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
-  	 L.builder_at_end context merge_bb
+        let body_bb = L.append_block context "while_body" the_function in
+        add_terminal (stmt (L.builder_at_end context body_bb) body)
+          (L.build_br pred_bb);
 
-        | A.While (predicate, body) ->
-  	  let pred_bb = L.append_block context "while" the_function in
-  	  ignore (L.build_br pred_bb builder);
+        let pred_builder = L.builder_at_end context pred_bb in
+        let bool_val = expr pred_builder predicate in
 
-  	  let body_bb = L.append_block context "while_body" the_function in
-  	  add_terminal (stmt (L.builder_at_end context body_bb) body)
-  	    (L.build_br pred_bb);
+        let merge_bb = L.append_block context "merge" the_function in
+        ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
+        L.builder_at_end context merge_bb
 
-  	  let pred_builder = L.builder_at_end context pred_bb in
-  	  let bool_val = expr pred_builder predicate in
-
-  	  let merge_bb = L.append_block context "merge" the_function in
-  	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
-  	  L.builder_at_end context merge_bb
-
-        | A.For (e1, e2, e3, body) -> stmt builder
-  	    ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
-      in *)
+      (* | A.For (e1, e2, e3, body) -> stmt builder ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] ) *)
+  in
 
       let rec item builder = function
         A.Stmt st -> ignore(stmt builder st); builder
@@ -212,5 +239,4 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       let builder = L.builder_at_end context (L.entry_block funct) in
       List.iter item builder program;
       L.build_ret_void builder; (*List.iter buildprogrambody items; this is one of the first functions we define*)
-in
-      the_module
+      in the_module
