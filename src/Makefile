@@ -30,7 +30,7 @@ menhir:
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
-OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx burger.cmx
+OBJS = ast.cmx codegen.cmx parser.cmx semant.cmx scanner.cmx burger.cmx
 
 burger : $(OBJS)
 	ocamlfind ocamlopt -linkpkg -package llvm -package str llvm.analysis $(OBJS) -o burger
@@ -54,10 +54,12 @@ ast.cmo :
 ast.cmx :
 codegen.cmo : ast.cmo
 codegen.cmx : ast.cmx
-burger.cmo: scanner.cmo parser.cmi codegen.cmo ast.cmo
-burger.cmx: scanner.cmx parser.cmx codegen.cmx ast.cmx
-parser.cmo: ast.cmo parser.cmi
-parser.cmx: ast.cmx parser.cmi
-scanner.cmo: parser.cmi
-scanner.cmx: parser.cmx
-parser.cmi: ast.cmo
+microc.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
+microc.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx
+parser.cmo : ast.cmo parser.cmi
+parser.cmx : ast.cmx parser.cmi
+scanner.cmo : parser.cmi
+scanner.cmx : parser.cmx
+semant.cmo : ast.cmo
+semant.cmx : ast.cmx
+parser.cmi : ast.cmo
