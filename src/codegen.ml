@@ -245,8 +245,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
          A.Null -> L.build_ret_void
        | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
   in
-  (* List.iter build_function_body functions
-     in *)
+  (* List.iter build_function_body functions in *)
 
 let ftype = L.function_type null_t [| |] in
 let funct = L.define_function "main" ftype the_module in
