@@ -63,8 +63,8 @@ let check_program program =
         VDecl _ -> print_string "is vdecl"
       | Expr e -> ignore (expr e)
     in
-
     List.iter check_stmt stmt_list
+
 
 
 (*
@@ -214,5 +214,3 @@ let check_program program =
 
     stmt (Block func.body)
 *)
-  in
-  List.iter check_program program
