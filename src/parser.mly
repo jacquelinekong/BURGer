@@ -55,10 +55,10 @@ typ:
 stmt:
     expr SEMI        { Expr $1 }
   | vdecl SEMI       { VDecl($1) }
-  | RETURN expr SEMI { Return($2) } /* TODO: fill in action */
-  | RETURN SEMI      { Return(NoExpr)}    /* TODO: fill in action */
-  | cond_stmt        { $1 } /* TODO: fill in action */
-  | iter_stmt        { $1 } /* TODO: fill in action */
+  | RETURN expr SEMI { Return($2) }
+  | RETURN SEMI      { Return(NoExpr)}
+  | cond_stmt        { $1 }
+  | iter_stmt        { $1 }
 
 stmt_list:
     stmt { [$1] }
@@ -68,9 +68,9 @@ stmt_list:
 /*TODO: fill in all actions*/
 
 cond_stmt:
-    IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE { If($3, $6, Block([])) } /* TODO: fill in action */
+    IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE { If($3, $6, Block([])) }
   | IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE
-      ELSE LBRACE stmt RBRACE                     { If($3, $6, $10) } /* TODO: fill in action */
+      ELSE LBRACE stmt RBRACE                     { If($3, $6, $10) }
   | IF LPAREN bool_expr RPAREN
       LBRACE stmt RBRACE
       ELSE IF LPAREN bool_expr RPAREN
@@ -80,8 +80,8 @@ cond_stmt:
 /*TODO fill in all actions*/
 
 iter_stmt:
-    WHILE LPAREN bool_expr RPAREN LBRACE stmt RBRACE                          { While($3, $6) }
-  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt RBRACE { For($3, $5, $7, $10) }
+    WHILE LPAREN bool_expr RPAREN LBRACE stmt RBRACE                               { While($3, $6) }
+  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { For($3, $5, $7, $10) }
 
 /*** Expressions ***/
 
@@ -95,6 +95,7 @@ expr:
 bool_expr:
     bool_expr  AND   bool_term { Binop($1, And,   $3) }
   | bool_expr  OR    bool_term { Binop($1, Or,    $3) }
+  /* | NOT bool_expr              { Unop(Not, $2) } */
   | bool_term                  { $1 }
 
 bool_term:
@@ -132,11 +133,6 @@ atom:
   | LPAREN expr RPAREN           { $2 }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
 
-/*** Assignment Expressions ***/
-
- /*assign_expr:
-    ID ASSIGN  {  }*/
-
 /*** Variable Declarations ***/
 
 vdecl:
@@ -146,7 +142,7 @@ vdecl:
 /*** Function Declarations ***/
 
 fdecl:
-  DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+  DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt RBRACE
     { { typ = $2;
         fname = $3;
         formals = $5;
