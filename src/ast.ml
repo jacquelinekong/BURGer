@@ -38,7 +38,7 @@ type stmt =
   | Return of expr
   | If of expr * stmt * stmt
   | While of expr * stmt
-  | For of stmt * expr * expr * stmt list
+  | For of bind * expr * expr * stmt list
 
 type func_decl = {
     typ : typ;
