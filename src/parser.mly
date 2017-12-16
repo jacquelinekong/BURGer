@@ -54,7 +54,7 @@ typ:
 
 stmt:
     expr SEMI        { Expr $1 }
-  | vdecl            { $1 }
+  | vdecl SEMI       { VDecl($1) }
   | RETURN expr SEMI { Return($2) }
   | RETURN SEMI      { Return(NoExpr)}
   | cond_stmt        { $1 }
@@ -88,7 +88,6 @@ iter_stmt:
 expr:
     arith_expr                   { $1 }
   | bool_expr                    { $1 }
-  | vassign                      { $1 }
   | ID ASSIGN expr               { Assign($1, $3) }
 
 /*** Boolean Expressions ***/
@@ -96,6 +95,7 @@ expr:
 bool_expr:
     bool_expr  AND   bool_term { Binop($1, And,   $3) }
   | bool_expr  OR    bool_term { Binop($1, Or,    $3) }
+  /* | NOT bool_expr              { Unop(Not, $2) } */
   | bool_term                  { $1 }
 
 bool_term:
@@ -136,15 +136,13 @@ atom:
 /*** Variable Declarations ***/
 
 vdecl:
-    typ ID SEMI             { VDecl($1, $2) }
-
-vassign:
-   typ ID ASSIGN expr       { VAssign(($1, $2), $4) }
+  typ ID { ($1, $2) }
+ /*| typ assign_expr { $1, $2 }*/
 
 /*** Function Declarations ***/
 
 fdecl:
-  DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+  DEF typ ID LPAREN formals_opt RPAREN LBRACE stmt RBRACE
     { { typ = $2;
         fname = $3;
         formals = $5;
