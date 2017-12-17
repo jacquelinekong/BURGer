@@ -1,0 +1,17 @@
+int b;
+b = 5;
+int foo(){
+	int a;
+	a = b+5;
+	return a;
+	}
+
+int bar(){
+	int b;
+	b = 2;
+	return foo();
+	}
+
+foo();
+bar();
+
