@@ -53,7 +53,7 @@ let check_program program =
 
     (* Raise an exception of the given rvalue type cannot be assigned to
        the given lvalue type *)
-    let check_assign lvaluet rvaluet err =
+    let check_types lvaluet rvaluet err =
        if lvaluet == rvaluet then lvaluet else raise err
     in
 
@@ -63,8 +63,18 @@ let check_program program =
       | Id s -> type_of_identifier s
       | Assign(var, e) as ex -> let lt = type_of_identifier var
                                 and rt = expr e in
-        check_assign lt rt (Failure ("Illegal assignment: " ^ string_of_typ lt ^
+        check_types lt rt (Failure ("Illegal assignment: " ^ string_of_typ lt ^
              " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))
+      | Binop(l, op, r) as e -> let t1 = expr l and t2 = expr r in
+        (match op with
+                Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+        | Equal | Neq when t1 = t2 -> Bool
+        | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
+        | And | Or when t1 = Bool && t2 = Bool -> Bool
+              | _ -> raise (Failure ("illegal binary operator " ^
+                    string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+                    string_of_typ t2 ^ " in " ^ string_of_expr e))
+              )
     in
 
     let check_stmt s = match s with
@@ -74,8 +84,6 @@ let check_program program =
     (* Check for assignments and duplicate vdecls *)
     List.iter check_stmt stmt_list;
     report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals);
-
-
 
 (*
 
