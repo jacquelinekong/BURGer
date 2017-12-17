@@ -42,13 +42,6 @@ let check_program program =
   in
 
   let functions =
-    (* let fdecl_main = A.Function({
-           typ = A.Int;
-           fname = "main";
-           formals = [];
-           body = List.rev(A.Return(A.IntLit(0)) :: List.rev(stmt_list))
-         })
-    in *)
       let functions_as_items = List.filter (fun x -> match x with
           Ast.Function(x) -> true
         | _ -> false) program
@@ -58,6 +51,16 @@ let check_program program =
             Ast.Function(x) -> x
           | _ -> failwith "function casting didn't work") all_functions_as_items
   in
+
+  (* let function_locals =
+    let get_locals_from_fbody fdecl =
+      let get_vdecl locals_list stmt = match stmt with
+          Ast.VDecl(typ, string) -> (typ, string) :: locals_list
+          | _ -> locals_list
+      in
+      List.fold_left get_vdecl [] fdecl.Ast.body
+    in List.fold_left get_locals_from_fbody (List.hd functions) (List.tl functions)
+  in *)
 
   let symbols = List.fold_left (fun var_map (varType, varName) -> StringMap.add varName varType var_map)
     StringMap.empty (globals)
