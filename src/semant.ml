@@ -41,49 +41,92 @@ let check_program program =
       | _ -> failwith "not turned into global") global_list
   in
 
-    let symbols = List.fold_left (fun var_map (varType, varName) -> StringMap.add varName varType var_map)
-      StringMap.empty (globals)
-    in
-    (* line below moved to bottom *)
+  let functions =
+    (* let fdecl_main = A.Function({
+           typ = A.Int;
+           fname = "main";
+           formals = [];
+           body = List.rev(A.Return(A.IntLit(0)) :: List.rev(stmt_list))
+         })
+    in *)
+      let functions_as_items = List.filter (fun x -> match x with
+          Ast.Function(x) -> true
+        | _ -> false) program
+      in
+        let all_functions_as_items = functions_as_items
+        in List.map (fun x -> match x with
+            Ast.Function(x) -> x
+          | _ -> failwith "function casting didn't work") all_functions_as_items
+  in
 
-    let type_of_identifier s =
-      try StringMap.find s symbols
-      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
-    in
+  let symbols = List.fold_left (fun var_map (varType, varName) -> StringMap.add varName varType var_map)
+    StringMap.empty (globals)
+  in
+  (* line below moved to bottom *)
 
-    (* Raise an exception of the given rvalue type cannot be assigned to
-       the given lvalue type *)
-    let check_types lvaluet rvaluet err =
-       if lvaluet == rvaluet then lvaluet else raise err
-    in
+  let type_of_identifier s =
+    try StringMap.find s symbols
+    with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+  in
 
-    let rec expr = function
-        IntLit _ -> Int
-      | BoolLit _ -> Bool
-      | Id s -> type_of_identifier s
-      | Assign(var, e) as ex -> let lt = type_of_identifier var
-                                and rt = expr e in
-        check_types lt rt (Failure ("Illegal assignment: " ^ string_of_typ lt ^
-             " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))
-      | Binop(l, op, r) as e -> let t1 = expr l and t2 = expr r in
-        (match op with
-                Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
-        | Equal | Neq when t1 = t2 -> Bool
-        | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
-        | And | Or when t1 = Bool && t2 = Bool -> Bool
-              | _ -> raise (Failure ("illegal binary operator " ^
-                    string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-                    string_of_typ t2 ^ " in " ^ string_of_expr e))
-              )
-    in
+  (* Raise an exception of the given rvalue type cannot be assigned to
+     the given lvalue type *)
+  let check_assign lvaluet rvaluet err =
+     if lvaluet == rvaluet then lvaluet else raise err
+  in
 
-    let check_stmt s = match s with
-        VDecl _ -> ()
-      | Expr e -> ignore (expr e)
-    in
-    (* Check for assignments and duplicate vdecls *)
-    List.iter check_stmt stmt_list;
-    report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals);
+  let built_in_decls =  StringMap.singleton "print"
+     { typ = Null; fname = "print"; formals = [(String, "x")]; body = [] }
+   in
+
+
+  let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
+                         built_in_decls functions
+  in
+
+  let function_decl s = try StringMap.find s function_decls
+       with Not_found -> raise (Failure ("unrecognized function " ^ s))
+  in
+
+  let rec expr = function
+      IntLit _ -> Int
+    | BoolLit _ -> Bool
+    | Id s -> type_of_identifier s
+    | Assign(var, e) as ex -> let lt = type_of_identifier var
+                              and rt = expr e in
+      check_assign lt rt (Failure ("Illegal assignment: " ^ string_of_typ lt ^
+           " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))
+    | Binop(l, op, r) as e -> let t1 = expr l and t2 = expr r in
+      (match op with
+              Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+      | Equal | Neq when t1 = t2 -> Bool
+      | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
+      | And | Or when t1 = Bool && t2 = Bool -> Bool
+            | _ -> raise (Failure ("illegal binary operator " ^
+                  string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+                  string_of_typ t2 ^ " in " ^ string_of_expr e))
+            )
+    | Call(fname, actuals) as call -> let fd = function_decl fname in
+       if List.length actuals != List.length fd.formals then
+         raise (Failure ("expecting " ^ string_of_int
+           (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
+       else
+         List.iter2 (fun (ft, _) e -> let et = expr e in
+            ignore (check_assign ft et
+              (Failure ("illegal actual argument found " ^ string_of_typ et ^
+              " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
+           fd.formals actuals;
+         fd.typ
+  in
+
+  let check_stmt s = match s with
+      VDecl _ -> ()
+    | Expr e -> ignore (expr e)
+
+  in
+  (* Check for assignments and duplicate vdecls *)
+  List.iter check_stmt stmt_list;
+  report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals);
 
 (*
 
