@@ -45,7 +45,6 @@ let check_program program =
       StringMap.empty (globals)
     in
     (* line below moved to bottom *)
-    (* report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals); *)
 
     let type_of_identifier s =
       try StringMap.find s symbols
@@ -69,11 +68,13 @@ let check_program program =
     in
 
     let check_stmt s = match s with
-        VDecl _ -> print_string "is vdecl"
+        VDecl _ -> ()
       | Expr e -> ignore (expr e)
     in
     (* Check for assignments and duplicate vdecls *)
     List.iter check_stmt stmt_list;
+    report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals);
+
 
 
 (*

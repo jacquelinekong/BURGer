@@ -62,7 +62,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
            typ = A.Int;
            fname = "main";
            formals = [];
-           body = List.rev(A.Return(A.IntLit(0)) :: stmt_list)
+           body = List.rev(A.Return(A.IntLit(0)) :: List.rev(stmt_list))
          })
     in
       let functions_as_items = List.filter (fun x -> match x with
@@ -80,9 +80,9 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
 
 
   let global_vars =
-  let global_var m (t, n) =
+  let global_var map (t, n) =
     let init = L.const_int (ltype_of_typ t) 0
-    in StringMap.add n (L.define_global n init the_module) m in
+    in StringMap.add n (L.define_global n init the_module) map in
   List.fold_left global_var StringMap.empty globals in
 
   (* printf() declaration *)
@@ -91,12 +91,12 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
-    let function_decl m fdecl =
+    let function_decl map fdecl =
       let name = fdecl.A.fname
       and formal_types = Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.A.formals)
       in
       let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
-      StringMap.add name (L.define_function name ftype the_module, fdecl) m
+      StringMap.add name (L.define_function name ftype the_module, fdecl) map
     in
     List.fold_left function_decl StringMap.empty functions
   in
@@ -124,11 +124,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       let function_locals =
         let get_locals_from_fbody function_body =
           let get_vdecl locals_list stmt = match stmt with
-              A.VDecl(typ, string) -> (
-                if List.exists(fun (local_typ, local_string) -> local_string = string) locals_list
-                then failwith ("duplicate local " ^ string ^ " in function " ^ fdecl.A.fname)
-                else (typ, string) :: locals_list
-              )
+              A.VDecl(typ, string) -> (typ, string) :: locals_list
               | _ -> locals_list
           in
           List.fold_left get_vdecl [] function_body
@@ -164,13 +160,13 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     	  | A.Greater -> L.build_icmp L.Icmp.Sgt
     	  | A.Geq     -> L.build_icmp L.Icmp.Sge *)
     	  ) e1' e2' "tmp" builder
-          (* | A.Unop(op, e) ->
+      (* | A.Unop(op, e) ->
     	  let e' = expr builder e in
       	  (match op with
       	    A.Neg     -> L.build_neg
-            | A.Not     -> L.build_not) e' "tmp" builder *)
-          (* | A.Assign (s, e) -> let e' = expr builder e in
-    	                   ignore (L.build_store e' (lookup s) builder); e' *)
+          | A.Not     -> L.build_not) e' "tmp" builder *)
+      | A.Assign (s, e) -> let e' = expr builder e in
+    	                   ignore (L.build_store e' (lookup s) builder); e'
       | A.Call (f, act) ->
         let (fdef, fdecl) = StringMap.find f function_decls in
   	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
@@ -190,8 +186,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     let rec stmt builder = function
       A.Expr e -> ignore(expr builder e); builder
     | A.Block sl -> List.fold_left stmt builder sl
-    (* | A.VDecl (typ, string) -> let e' = expr builder e in
-      ignore (L.build_store e' (var_lookup string) builder); builder *)
+    | A.VDecl (typ, string) -> builder
     | A.Return e -> ignore (match fdecl.A.typ with
         A.Null -> L.build_ret_void builder
         | _ -> L.build_ret (expr builder e) builder); builder
