@@ -1,5 +1,8 @@
-int i = 0;
-while(i<5){
-	print(i);
-	i++;
+int i;
+i = 0;
+while(i<<5){
+	print("pls");
+	print("help");
+	i=i+1;
+
 }

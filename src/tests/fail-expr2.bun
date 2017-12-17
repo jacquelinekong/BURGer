@@ -1,0 +1,6 @@
+int a;
+bool b;
+
+if(a == b){
+  print("wrong");
+}
