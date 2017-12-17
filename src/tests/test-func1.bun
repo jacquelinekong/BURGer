@@ -1,7 +1,8 @@
 def int add(int a) {
+	int y;
+	y = 2;
 	return a;
 }
-int a;
-a = 1;
-add(a);
-print(a);
+int x;
+add(2);
+print("hello");

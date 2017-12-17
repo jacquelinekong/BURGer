@@ -1,6 +1,8 @@
 if(true){
-	print("YES");
+	int x;
+	int y;
+	print("fff");
 	}
 else{
-	print("NO);
+	print("NO");
 	}
