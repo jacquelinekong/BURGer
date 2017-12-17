@@ -1,0 +1,6 @@
+def int add(int a){
+	return a;
+	}
+def int add(int b){
+	return b;
+	}

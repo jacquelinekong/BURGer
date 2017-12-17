@@ -1,0 +1,5 @@
+def int check(int a, int b){
+	return a;
+	}
+check(1, 2, 3);
+
