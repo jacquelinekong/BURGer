@@ -4,3 +4,4 @@
 
 ./burger.native < $1.bun > $1.ll
 clang $1.ll
+cat $1.ll
