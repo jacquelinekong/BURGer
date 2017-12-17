@@ -62,7 +62,6 @@ let check_program program =
   let symbols = List.fold_left (fun var_map (varType, varName) -> StringMap.add varName varType var_map)
     StringMap.empty (globals)
   in
-  (* line below moved to bottom *)
 
   let type_of_identifier s =
     try StringMap.find s symbols
@@ -75,10 +74,15 @@ let check_program program =
      if lvaluet == rvaluet then lvaluet else raise err
   in
 
+  (* Raise an exception if a given binding is to a void type *)
+  let check_not_void exceptf = function
+      (Null, n) -> raise (Failure (exceptf n))
+    | _ -> ()
+  in
+
   let built_in_decls =  StringMap.singleton "print"
      { typ = Null; fname = "print"; formals = [(String, "x")]; body = [] }
    in
-
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
                          built_in_decls functions
@@ -86,6 +90,21 @@ let check_program program =
 
   let function_decl s = try StringMap.find s function_decls
        with Not_found -> raise (Failure ("unrecognized function " ^ s))
+  in
+
+  let check_function func =
+
+    List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
+      " in " ^ func.fname)) func.formals;
+
+    report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
+      (List.map snd func.formals);
+
+    (* List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
+      " in " ^ func.fname)) func.locals; *)
+
+    (* report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
+      (List.map snd func.locals); *)
   in
 
   let rec expr = function
@@ -125,6 +144,7 @@ let check_program program =
 
   in
   (* Check for assignments and duplicate vdecls *)
+  List.iter check_function functions;
   List.iter check_stmt stmt_list;
   report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals);
 
