@@ -43,7 +43,6 @@ rule token = parse
   | "true"             { TRUE }
   | "false"            { FALSE }
   | "int"              { INT }
-  | "float"            { FLOAT }
   | "char"             { CHAR }
   | "String"           { STRING }
   | "bool"             { BOOL }
