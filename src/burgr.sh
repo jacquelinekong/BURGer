@@ -5,6 +5,6 @@
 ./burger.native < $1.bun > $1.ll
 clang $1.ll
 echo "--------------------"
-echo "Output for .ll test:
+echo "Output for .ll test:"
 echo "--------------------"
 cat $1.ll
