@@ -12,6 +12,10 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
+(* external print_s: s -> unit = "caml_print_string"
+external print_i: i -> unit = "caml_print_int" *)
+
+
 (* passing in a program for hello world *)
 let translate (program) = (* QUESTION: will we always only pass in a program bc we allow top-level code? *)
   let context = L.global_context () in
@@ -78,7 +82,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   List.fold_left global_var StringMap.empty globals in
 
   (* printf() declaration *)
-  let printf_t = L.var_arg_function_type i8_t [| L.pointer_type i8_t |] in
+  let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
   (* Define each function (arguments and return type) so we can call it *)
@@ -97,6 +101,8 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   let build_function_body fdecl =
     let (the_function, _) = StringMap.find fdecl.A.fname function_decls in
     let builder = L.builder_at_end context (L.entry_block the_function) in
+
+    let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
 
     let local_vars =
       let add_formal var_map (formal_type, formal_name) param = L.set_value_name formal_name param;
@@ -129,8 +135,38 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   in
 
       let rec expr builder = function
-        A.StringLit s -> L.build_global_stringptr s "str" builder
-      | A.Call ("print", [s]) -> L.build_call printf_func [| (expr builder s) |] "print" builder
+        A.StringLit e -> L.build_global_stringptr e "str" builder
+      | A.Call ("print", [s]) ->
+        let test = s in (match s with
+          A.Id test -> L.build_call printf_func [| (expr builder s) |] "print" builder
+        | A.StringLit test -> L.build_call printf_func [| (expr builder s) |] "print" builder
+        | A.IntLit test -> L.build_call printf_func [| int_format_str ; (expr builder s) |]
+                             "print" builder
+          )
+        (* | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
+           "print" builder
+
+           | A.BoolLit test -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "print" builder
+        *)
+
+      (* | A.Call ("print", [s]) -> L.build_call printf_func [| (expr builder s) |] "print" builder
+      | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
+                                        "print" builder *)
+
+        (* let int_format_str builder = L.build_global_stringptr "%d\n" "fmt" llbuilder;
+        and str_format_str builder = L.build_global_stringptr "%s\n" "fmt" llbuilder in
+
+        let format_str s_typ builder = match s_typ with
+            A.Int -> int_format_str builder
+          | A.String -> str_format_str builder
+          | _ -> raise (Failure "Invalid printf type")
+        in
+
+        let e' = expr builder e
+        and e_type =
+        L.build_call printf_func [| format_str e_type llbuilder; e' |]
+          "printf" builder *)
+
       | A.IntLit i -> L.const_int i32_t i
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.NoExpr -> L.const_int i32_t 0
