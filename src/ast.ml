@@ -25,7 +25,6 @@ type expr =
   | BoolLit of bool
   | StringLit of string
   | Assign of string * expr
-  (* | VAssign of bind * expr *)
   | Binop of expr * op * expr
   | Unop of uop * expr
   | NoExpr
@@ -36,8 +35,8 @@ type stmt =
   | Expr of expr
   | VDecl of bind
   | Return of expr
-  | If of expr * stmt * stmt
-  | While of expr * stmt
+  | If of expr * stmt list * stmt list
+  | While of expr * stmt list
   | For of bind * expr * expr * stmt list
 
 type func_decl = {

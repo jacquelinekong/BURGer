@@ -12,12 +12,12 @@
 %token <string> STRINGLIT
 %token <int> INTLIT
 %token LPAREN RPAREN SEMI LBRACE RBRACE LBRACK RBRACK COMMA
-%token PLUS MINUS TIMES DIVIDE ASSIGN
+%token PLUS MINUS TIMES DIVIDE ASSIGN NEG
 %token EQ NEQ LEQ GEQ LT GT
 %token AND OR NOT
 %token IF ELSE
 %token TRUE FALSE
-%token INT FLOAT CHAR STRING BOOL NULL
+%token INT CHAR STRING BOOL NULL
 %token FOR WHILE DEF RETURN
 %token EOF
 
@@ -30,7 +30,6 @@
 
 program:
    item_list EOF { List.rev $1 }
-  /*| item EOF { [$1] }*/
 
 item_list:
    /*nothing */ { [] }
@@ -39,9 +38,6 @@ item_list:
 item:
     stmt      { Stmt($1) }
   | fdecl     { Function($1) }
-
-  /*| stmt item { Stmt($1) :: $2 }
-  | fdecl item { Function($1) :: $2 }*/
 
 typ:
     INT    { Int }
@@ -53,7 +49,7 @@ typ:
 /*** Statements ***/
 
 stmt:
-    expr SEMI        { Expr $1 }
+    expr SEMI        { Expr($1) }
   | vdecl SEMI       { VDecl($1) }
   | RETURN expr SEMI { Return($2) }
   | RETURN SEMI      { Return(NoExpr)}
@@ -77,17 +73,18 @@ cond_stmt:
       LBRACE stmt RBRACE                          { If($3, $6, $14) }
 
 /*** Loops ***/
-/*TODO fill in all actions*/
 
 iter_stmt:
-    WHILE LPAREN bool_expr RPAREN LBRACE stmt RBRACE                               { While($3, $6) }
-  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { For($3, $5, $7, $10) }
+    WHILE LPAREN bool_expr RPAREN LBRACE stmt RBRACE                          { While($3, $6) }
+  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt RBRACE { For($3, $5, $7, $10) }
 
 /*** Expressions ***/
 
 expr:
     arith_expr                   { $1 }
+  | NEG arith_expr               { Unop(Neg, $2) }
   | bool_expr                    { $1 }
+  | NOT bool_expr                { Unop(Not, $2) }
   | ID ASSIGN expr               { Assign($1, $3) }
 
 /*** Boolean Expressions ***/
@@ -95,7 +92,6 @@ expr:
 bool_expr:
     bool_expr  AND   bool_term { Binop($1, And,   $3) }
   | bool_expr  OR    bool_term { Binop($1, Or,    $3) }
-  /* | NOT bool_expr              { Unop(Not, $2) } */
   | bool_term                  { $1 }
 
 bool_term:
@@ -132,6 +128,12 @@ atom:
   | STRINGLIT                    { StringLit($1) }
   | LPAREN expr RPAREN           { $2 }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | LBRACK atom_list RBRACK      { [] }
+
+/*** Lists ***/
+atom_list:
+    atom COMMA atom { [] }
+  | atom_list COMMA atom { [] }
 
 /*** Variable Declarations ***/
 
@@ -150,7 +152,7 @@ fdecl:
       } }
 
 formals_opt:
-    { [] }
+    /* nothing */ { [] }
   | formal_list   { List.rev $1 }
 
 formal_list:
@@ -158,7 +160,7 @@ formal_list:
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
 actuals_opt:
-     { [] }
+    /* nothing */ { [] }
   | actuals_list  { List.rev $1 }
 
 actuals_list:
