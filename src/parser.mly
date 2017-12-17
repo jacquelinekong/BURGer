@@ -68,34 +68,35 @@ stmt_list:
 /*TODO: fill in all actions*/
 
 cond_stmt:
-    IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE { If($3, $6, Block([])) }
-  | IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE
-      ELSE LBRACE stmt RBRACE                     { If($3, $6, $10) }
+    IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE { If($3, $6, []) }
+  | IF LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE
+      ELSE LBRACE stmt_list RBRACE                     { If($3, $6, $10) }
   | IF LPAREN bool_expr RPAREN
-      LBRACE stmt RBRACE
+      LBRACE stmt_list RBRACE
       ELSE IF LPAREN bool_expr RPAREN
-      LBRACE stmt RBRACE                          { If($3, $6, $14) }
+      LBRACE stmt_list RBRACE                          { If($3, $6, $14) }
 
 /*** Loops ***/
-/*TODO fill in all actions*/
 
 iter_stmt:
-    WHILE LPAREN bool_expr RPAREN LBRACE stmt RBRACE                               { While($3, $6) }
+    WHILE LPAREN bool_expr RPAREN LBRACE stmt_list RBRACE                               { While($3, $6) }
   | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt_list RBRACE { For($3, $5, $7, $10) }
 
 /*** Expressions ***/
 
 expr:
     arith_expr                   { $1 }
+  | NOT arith_expr               { Unop(Not, $2) }
   | bool_expr                    { $1 }
+  | NOT bool_expr                { Unop(Not, $2) }
   | ID ASSIGN expr               { Assign($1, $3) }
+
 
 /*** Boolean Expressions ***/
 
 bool_expr:
     bool_expr  AND   bool_term { Binop($1, And,   $3) }
   | bool_expr  OR    bool_term { Binop($1, Or,    $3) }
-  /* | NOT bool_expr              { Unop(Not, $2) } */
   | bool_term                  { $1 }
 
 bool_term:
@@ -133,6 +134,10 @@ atom:
   | LPAREN expr RPAREN           { $2 }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
 
+/*** Lists ***/
+/* atom_list:  */
+
+
 /*** Variable Declarations ***/
 
 vdecl:
@@ -150,7 +155,7 @@ fdecl:
       } }
 
 formals_opt:
-    { [] }
+    /* nothing */ { [] }
   | formal_list   { List.rev $1 }
 
 formal_list:
@@ -158,7 +163,7 @@ formal_list:
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
 actuals_opt:
-     { [] }
+    /* nothing */ { [] }
   | actuals_list  { List.rev $1 }
 
 actuals_list:
