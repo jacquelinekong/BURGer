@@ -52,11 +52,12 @@ item:
   | fdecl     { Function($1) }
 
 typ:
-    INT    { Int }
-  | BOOL   { Bool }
-  | CHAR   { Char }
-  | STRING { String }
-  | NULL   { Null }
+    INT       { Int }
+  | BOOL      { Bool }
+  | CHAR      { Char }
+  | STRING    { String }
+  | NULL      { Null }
+  | typ TIMES { Pointer($1) }
 
 /*** Statements ***/
 

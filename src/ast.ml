@@ -14,7 +14,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Char | String | Null
+type typ = Int | Bool | Char | String | Null | Pointer of typ
 
 type bind = typ * string
 
