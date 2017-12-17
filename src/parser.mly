@@ -21,6 +21,8 @@
 %token FOR WHILE DEF RETURN
 %token EOF
 
+%nonassoc NOELSE
+
 %start program
 %type <Ast.program> program
 
@@ -64,7 +66,7 @@ stmt_list:
 /*TODO: fill in all actions*/
 
 cond_stmt:
-    IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE { If($3, $6, Block([])) }
+    IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE %prec NOELSE { If($3, $6, Block([])) }
   | IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE
       ELSE LBRACE stmt RBRACE                     { If($3, $6, $10) }
   | IF LPAREN bool_expr RPAREN

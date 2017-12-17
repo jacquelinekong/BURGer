@@ -176,8 +176,8 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     in
 
     let rec stmt builder = function
-      A.Expr e -> ignore(expr builder e); builder
-    | A.Block sl -> List.fold_left stmt builder sl
+      A.Block sl -> List.fold_left stmt builder sl
+    |  A.Expr e -> ignore(expr builder e); builder
     | A.VDecl (typ, string) -> builder
     | A.Return e -> ignore (match fdecl.A.typ with
         A.Null -> L.build_ret_void builder
