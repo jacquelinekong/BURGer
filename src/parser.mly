@@ -128,12 +128,12 @@ atom:
   | STRINGLIT                    { StringLit($1) }
   | LPAREN expr RPAREN           { $2 }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | LBRACK atom_list RBRACK      { [] }
+  /* | LBRACK atom_list RBRACK      { [] } */
 
 /*** Lists ***/
-atom_list:
+/* atom_list:
     atom COMMA atom { [] }
-  | atom_list COMMA atom { [] }
+  | atom_list COMMA atom { [] } */
 
 /*** Variable Declarations ***/
 

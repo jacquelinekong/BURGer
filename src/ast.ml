@@ -35,9 +35,9 @@ type stmt =
   | Expr of expr
   | VDecl of bind
   | Return of expr
-  | If of expr * stmt list * stmt list
-  | While of expr * stmt list
-  | For of bind * expr * expr * stmt list
+  | If of expr * stmt * stmt
+  | While of expr * stmt
+  | For of bind * expr * expr * stmt
 
 type func_decl = {
     typ : typ;
