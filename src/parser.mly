@@ -11,15 +11,27 @@
 %token <string> ID
 %token <string> STRINGLIT
 %token <int> INTLIT
+
 %token LPAREN RPAREN SEMI LBRACE RBRACE LBRACK RBRACK COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NEG
-%token EQ NEQ LEQ GEQ LT GT
+%token LT GT LEQ GEQ EQ NEQ
 %token AND OR NOT
-%token IF ELSE
+%token IF ELSE NOELSE
 %token TRUE FALSE
 %token INT CHAR STRING BOOL NULL
 %token FOR WHILE DEF RETURN
 %token EOF
+
+%nonassoc NOELSE
+%nonassoc ELSE
+%right ASSIGN
+%left OR
+%left AND
+%left EQ NEQ
+%left LT GT LEQ GEQ
+%left PLUS MINUS
+%left TIMES DIVIDE
+%right NOT NEG
 
 %start program
 %type <Ast.program> program
@@ -40,95 +52,55 @@ item:
   | fdecl     { Function($1) }
 
 typ:
-    INT    { Int }
-  | BOOL   { Bool }
-  | CHAR   { Char }
-  | STRING { String }
-  | NULL   { Null }
+    INT       { Int }
+  | BOOL      { Bool }
+  | CHAR      { Char }
+  | STRING    { String }
+  | NULL      { Null }
+  | typ TIMES { Pointer($1) }
 
 /*** Statements ***/
 
 stmt:
-    expr SEMI        { Expr($1) }
-  | vdecl SEMI       { VDecl($1) }
-  | RETURN expr SEMI { Return($2) }
-  | RETURN SEMI      { Return(NoExpr)}
-  | cond_stmt        { $1 }
-  | iter_stmt        { $1 }
+    expr SEMI                               { Expr($1) }
+  | vdecl SEMI                              { VDecl($1) }
+  | RETURN expr SEMI                        { Return($2) }
+  | RETURN SEMI                             { Return(NoExpr)}
+  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
+  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
+  | FOR LPAREN expr SEMI expr SEMI expr RPAREN stmt
+                                            { For($3, $5, $7, $9) }
+  | WHILE LPAREN expr RPAREN stmt           { While($3, $5) }
 
 stmt_list:
     stmt { [$1] }
   | stmt_list stmt { ($2 :: $1) }
 
-/*** Conditional Statements ***/
-/*TODO: fill in all actions*/
-
-cond_stmt:
-    IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE { If($3, $6, Block([])) }
-  | IF LPAREN bool_expr RPAREN LBRACE stmt RBRACE
-      ELSE LBRACE stmt RBRACE                     { If($3, $6, $10) }
-  | IF LPAREN bool_expr RPAREN
-      LBRACE stmt RBRACE
-      ELSE IF LPAREN bool_expr RPAREN
-      LBRACE stmt RBRACE                          { If($3, $6, $14) }
-
-/*** Loops ***/
-
-iter_stmt:
-    WHILE LPAREN bool_expr RPAREN LBRACE stmt RBRACE                          { While($3, $6) }
-  | FOR LPAREN vdecl SEMI bool_expr SEMI arith_expr RPAREN LBRACE stmt RBRACE { For($3, $5, $7, $10) }
-
 /*** Expressions ***/
 
 expr:
-    arith_expr                   { $1 }
-  | NEG arith_expr               { Unop(Neg, $2) }
-  | bool_expr                    { $1 }
-  | NOT bool_expr                { Unop(Not, $2) }
-  | ID ASSIGN expr               { Assign($1, $3) }
-
-/*** Boolean Expressions ***/
-
-bool_expr:
-    bool_expr  AND   bool_term { Binop($1, And,   $3) }
-  | bool_expr  OR    bool_term { Binop($1, Or,    $3) }
-  | bool_term                  { $1 }
-
-bool_term:
-    bool_lit                      { $1 }
-  | arith_expr bool_op arith_expr { Binop($1, $2, $3) }
-
-bool_op:
-    EQ    { Equal }
-  | NEQ   { Neq }
-  | LT    { Less }
-  | LEQ   { Leq }
-  | GT    { Greater }
-  | GEQ   { Geq }
-
-bool_lit:
-    TRUE  { BoolLit(true) }
-  | FALSE { BoolLit(false) }
-
-/*** Arithmetic Expressions ***/
-
-arith_expr:
-    arith_term                   { $1 }
-  | arith_expr PLUS  arith_term  { Binop($1, Add, $3) }
-  | arith_expr MINUS arith_term  { Binop($1, Sub, $3) }
-
-arith_term:
-    atom                     { $1 }
-  | arith_term TIMES  atom   { Binop($1, Mult, $3) }
-  | arith_term DIVIDE atom   { Binop($1, Div, $3) }
-
-atom:
-    INTLIT                       { IntLit($1) }
-  | ID                           { Id($1) }
-  | STRINGLIT                    { StringLit($1) }
-  | LPAREN expr RPAREN           { $2 }
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  /* | LBRACK atom_list RBRACK      { [] } */
+    NEG expr                      { Unop(Neg, $2) }
+  | NOT expr                      { Unop(Not, $2) }
+  | ID ASSIGN expr                { Assign($1, $3) }
+  | expr PLUS   expr              { Binop($1, Add,   $3) }
+  | expr MINUS  expr              { Binop($1, Sub,   $3) }
+  | expr TIMES  expr              { Binop($1, Mult,  $3) }
+  | expr DIVIDE expr              { Binop($1, Div,   $3) }
+  | expr EQ     expr              { Binop($1, Equal, $3) }
+  | expr NEQ    expr              { Binop($1, Neq,   $3) }
+  | expr LT     expr              { Binop($1, Less,  $3) }
+  | expr LEQ    expr              { Binop($1, Leq,   $3) }
+  | expr GT     expr              { Binop($1, Greater, $3) }
+  | expr GEQ    expr              { Binop($1, Geq,   $3) }
+  | expr AND    expr              { Binop($1, And,   $3) }
+  | expr OR     expr              { Binop($1, Or,    $3) }
+  | INTLIT                        { IntLit($1) }
+  | TRUE                          { BoolLit(true) }
+  | FALSE                         { BoolLit(false) }
+  | ID                            { Id($1) }
+  | STRINGLIT                     { StringLit($1) }
+  | LPAREN expr RPAREN            { $2 }
+  | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
 
 /*** Lists ***/
 /* atom_list:
