@@ -30,16 +30,6 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     | A.Bool -> i1_t
   in
 
-  (*the following function was potentially going to be used to check if an item
-  is a statement or not*)
-  (* let item_type = function
-      A.item -> A.Stmt
-    | A.item -> A.Function
-  in *)
-
-  (* let discern_items = function
-    A.Stmt ->
-  | A.Function ->  *)
 (*List.filter to find all the statements, and then List.map to make them statements
   because right now, you've just filtered a list of items but they're not stmts yet
   and you need to make them stmts to pass them into the program.
@@ -68,16 +58,26 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   in
 
   let functions =
-    let functions_as_items = List.filter (fun x -> match x with
+    let fdecl_main = A.Function({
+           typ = A.Int;
+           fname = "main";
+           formals = [];
+           body = List.rev(A.Return(A.IntLit(0)) :: stmt_list)
+         })
+    in
+      let functions_as_items = List.filter (fun x -> match x with
           A.Function(x) -> true
         | _ -> false) program
-    in List.map (fun x -> match x with
-          A.Function(x) -> x
-        | _ -> failwith "function casting didn't work") functions_as_items
+      in
+        let all_functions_as_items = fdecl_main :: functions_as_items
+        in List.map (fun x -> match x with
+            A.Function(x) -> x
+          | _ -> failwith "function casting didn't work") all_functions_as_items
   in
 
   (*after you figure out which items are statements, you need to go through the statements
     and figure out which ones contain the variables*)
+
 
   let global_vars =
   let global_var m (t, n) =
@@ -245,12 +245,6 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
          A.Null -> L.build_ret_void
        | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
   in
-  (* List.iter build_function_body functions in *)
-
-let ftype = L.function_type null_t [| |] in
-let funct = L.define_function "main" ftype the_module in
-let builder = L.builder_at_end context (L.entry_block funct) in
 
 List.iter build_function_body functions;
-L.build_ret_void builder;
 the_module
