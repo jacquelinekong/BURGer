@@ -1,0 +1,6 @@
+int i;
+bool b;
+
+i = 4;
+b = true;
+i = b;

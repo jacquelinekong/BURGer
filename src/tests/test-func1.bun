@@ -1,7 +1,5 @@
 def int add(int a) {
 	return a;
 }
-int a;
-a = 1;
-add(a);
-print(a);
+int b;
+b = add(1);
