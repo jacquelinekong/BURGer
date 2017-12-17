@@ -7,5 +7,6 @@ def bool check(){
 	}
 }
 
-bool x = check();
+bool x;
+x = check();
 print(x);
