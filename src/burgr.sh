@@ -8,3 +8,8 @@ echo "--------------------"
 echo "Output for .ll test:"
 echo "--------------------"
 cat $1.ll
+echo "--------------------"
+echo "Running the executable"
+echo "--------------------"
+./a.out
+echo " "

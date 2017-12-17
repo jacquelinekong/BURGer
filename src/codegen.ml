@@ -30,13 +30,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     | A.Bool -> i1_t
   in
 
-(*List.filter to find all the statements, and then List.map to make them statements
-  because right now, you've just filtered a list of items but they're not stmts yet
-  and you need to make them stmts to pass them into the program.
-  The function should check if it's a statement and it needs to be passed the list of items.
-  Freddy has confirmed that you do need to pass "program" to it. I feel like the function
-  is no good though. But I am not sure.*)
-  let stmt_list = (* TODO: pull out other kinds of statements *)
+  let stmt_list =
     let stmts_as_items =
       List.filter (fun x -> match x with
         A.Stmt(x) -> true
@@ -77,8 +71,6 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
 
   (*after you figure out which items are statements, you need to go through the statements
     and figure out which ones contain the variables*)
-
-
   let global_vars =
   let global_var map (t, n) =
     let init = L.const_int (ltype_of_typ t) 0
@@ -151,14 +143,14 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     	  | A.Sub     -> L.build_sub
     	  | A.Mult    -> L.build_mul
         | A.Div     -> L.build_sdiv
-    	  (* | A.And     -> L.build_and
+    	  | A.And     -> L.build_and
     	  | A.Or      -> L.build_or
     	  | A.Equal   -> L.build_icmp L.Icmp.Eq
     	  | A.Neq     -> L.build_icmp L.Icmp.Ne
     	  | A.Less    -> L.build_icmp L.Icmp.Slt
     	  | A.Leq     -> L.build_icmp L.Icmp.Sle
     	  | A.Greater -> L.build_icmp L.Icmp.Sgt
-    	  | A.Geq     -> L.build_icmp L.Icmp.Sge *)
+    	  | A.Geq     -> L.build_icmp L.Icmp.Sge
     	  ) e1' e2' "tmp" builder
       (* | A.Unop(op, e) ->
     	  let e' = expr builder e in
