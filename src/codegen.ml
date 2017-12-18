@@ -44,9 +44,11 @@ let translate (program) =
   let globals =
     let global_list = List.filter (fun x -> match x with
         A.VDecl(x) -> true
+      | A.VAssign(x, _) -> true
       | _ -> false) stmt_list
     in List.map (fun x -> match x with
         A.VDecl(x) -> x
+      | A.VAssign(x, _) -> x
       | _ -> failwith "not turned into global") global_list
   in
 
@@ -151,18 +153,6 @@ let translate (program) =
   | A.Binop (e1, op, e2) ->
 	  let e1' = expr builder e1
      and e2' = expr builder e2 in
-     let bool_e1 = if (L.type_of e1' str_t) then true else false in
-     let bool_e2 = if (L.type_of e2' str_t) then true else false in
-      (* if (bool_e1 || bool_e2) then
-        (* (if (bool_e1 && !bool_e2) || (!bool_e1 && bool_e2) then
-           (*concatenate strings*)
-        else
-          (*convert int to string*)
-        ) *)
-       (match op with
-          A.Add -> (*sprintf ???*)
-       ) (is_string e1') (is_string e2') "tmp" builder *)
-     (* else *)
   	  (match op with
         A.Add     -> L.build_add
   	  | A.Sub     -> L.build_sub
@@ -233,6 +223,7 @@ let translate (program) =
       A.Block sl -> List.fold_left stmt builder sl
     |  A.Expr e -> ignore(expr builder e); builder
     | A.VDecl (typ, string) -> builder
+    | A.VAssign ((typ, string), e) -> ignore(expr builder (A.Assign(string, e))); builder
     | A.Return e -> ignore (match fdecl.A.typ with
         A.Null -> L.build_ret_void builder
         | _ -> L.build_ret (expr builder e) builder); builder
