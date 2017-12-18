@@ -8,8 +8,11 @@ void print(char *s){
   int i = 0;
   while (i < strlen(s)){
     c = s[i];
-    if (c == '\\' && s[i+1] == 'n'){
-      printf("\n");
+    if (c == '\\'){
+      if (s[i+1] == 'n')
+        printf("\n");
+      if (s[i+1] == 't')
+        printf("\t");
       i++;
     }
     else if (c == '\\' && s[i+1] == 't'){
@@ -28,8 +31,11 @@ void println(char *s){
   int i = 0;
   while (i < strlen(s)){
     c = s[i];
-    if (c == '\\' && s[i+1] == 'n'){
-      printf("\n");
+    if (c == '\\'){
+      if (s[i+1] == 'n')
+        printf("\n");
+      if (s[i+1] == 't')
+        printf("\t");
       i++;
     }
     else
