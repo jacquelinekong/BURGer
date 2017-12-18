@@ -4,7 +4,6 @@
 * Jacqueline Kong
 *)
 { open Parser
-  module B = Buffer
 }
 
 let escape = '\\' ['\\' ''' '"' 'n' 'r' 't']

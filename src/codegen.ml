@@ -76,14 +76,17 @@ let translate (program) =
   List.fold_left global_var StringMap.empty globals in
 
   (* printf() declaration *)
+  let print_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+  let print_func = L.declare_function "print" print_t the_module in
+
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
   let println_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let println_func = L.declare_function "println" println_t the_module in
 
-  let sprintf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t; L.i32_type i32_t; L.pointer_type i8_t |] in
-  let sprintf_func = L.declare_function "sprintf" sprintf_t the_module in
+  (* let sprintf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t; L.i32_type i32_t; L.pointer_type i8_t |] in
+  let sprintf_func = L.declare_function "sprintf" sprintf_t the_module in *)
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -183,19 +186,19 @@ let translate (program) =
     ignore (L.build_store e' (lookup s) builder); e'
   | A.Call ("print", [s]) ->
     let test = s in (match s with
-         A.StringLit test -> L.build_call printf_func [| (expr builder s) |] "print" builder
-        | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "print" builder
+         A.StringLit test -> L.build_call print_func [| (expr builder s) |] "print" builder
+        | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "printf" builder
       )
   | A.Call("println", [s]) ->
     let test = s in (match s with
           A.StringLit test -> L.build_call println_func [| (expr builder s) |] "print" builder
         | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
       )
-  | A.Call("sprintf", [s]) ->
+  (* | A.Call("sprintf", [s]) ->
     let buffer = s in (match s with
           A.IntLit buffer -> L.build_call sprintf_func [| int_format_str ; (expr builder s)|] "sprintf" builder
         | A.StringLit buffer -> L.build_call sprintf_func [| (expr builder s) |] "sprintf" builder
-      )
+      ) *)
 
   (* let int_format_str builder = L.build_global_stringptr "%d\n" "fmt" llbuilder;
      and str_format_str builder = L.build_global_stringptr "%s\n" "fmt" llbuilder in
