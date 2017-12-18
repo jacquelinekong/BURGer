@@ -1,2 +1,2 @@
 int x;
-x = true;
+int x;
