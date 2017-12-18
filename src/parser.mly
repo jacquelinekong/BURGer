@@ -52,18 +52,18 @@ item:
   | fdecl     { Function($1) }
 
 typ:
-    INT       { Int }
-  | BOOL      { Bool }
-  | CHAR      { Char }
-  | STRING    { String }
-  | NULL      { Null }
-  | typ TIMES { Pointer($1) }
+    INT                    { Int }
+  | BOOL                   { Bool }
+  | CHAR                   { Char }
+  | STRING                 { String }
+  | NULL                   { Null }
+  | typ LBRACK expr RBRACK { Array($1, $3) }
 
 /*** Statements ***/
 
 stmt:
     expr SEMI                               { Expr($1) }
-  | vdecl SEMI                              { VDecl($1) }
+  | vdecl SEMI                              { $1 }
   | RETURN expr SEMI                        { Return($2) }
   | RETURN SEMI                             { Return(NoExpr) }
   | LBRACE stmt_list RBRACE                 { Block(List.rev $2) }
@@ -72,6 +72,7 @@ stmt:
   | FOR LPAREN expr SEMI expr SEMI expr RPAREN stmt
                                             { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt           { While($3, $5) }
+
 
 stmt_list:
     stmt { [$1] }
@@ -100,6 +101,7 @@ expr:
   | FALSE                         { BoolLit(false) }
   | ID                            { Id($1) }
   | STRINGLIT                     { StringLit($1) }
+  | ID LBRACK expr RBRACK         { Access($1, $3) }
   | LPAREN expr RPAREN            { $2 }
   | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
 
@@ -111,7 +113,8 @@ expr:
 /*** Variable Declarations ***/
 
 vdecl:
-  typ ID { ($1, $2) }
+    typ ID { VDecl($1, $2) }
+  | typ ID ASSIGN expr { VAssign(($1, $2), $4)}
  /*| typ assign_expr { $1, $2 }*/
 
 /*** Function Declarations ***/
