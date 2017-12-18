@@ -85,6 +85,12 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
+  let println_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+  let println_func = L.declare_function "println" println_t the_module in
+
+  let sprintf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+  let sprintf_func = L.declare_function "sprintf" sprintf_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl map fdecl =
@@ -102,7 +108,8 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     let (the_function, _) = StringMap.find fdecl.A.fname function_decls in
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
-    let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
+    let int_format_str_ln = L.build_global_stringptr "%d\n" "fmt" builder in
+    let int_format_str = L.build_global_stringptr "%d" "fmt" builder in
 
     let local_vars =
       let add_formal var_map (formal_type, formal_name) param = L.set_value_name formal_name param;
@@ -169,6 +176,12 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
              A.StringLit test -> L.build_call printf_func [| (expr builder s) |] "print" builder
             | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "print" builder
           )
+      | A.Call("println", [s]) ->
+        let test = s in (match s with
+              A.StringLit test -> L.build_call println_func [| (expr builder s) |] "print" builder
+            | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
+          )
+      (* | A.Call("println", [s]) ->  *)
       (* | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
          "print" builder
       *)
