@@ -52,12 +52,12 @@ item:
   | fdecl     { Function($1) }
 
 typ:
-    INT       { Int }
-  | BOOL      { Bool }
-  | CHAR      { Char }
-  | STRING    { String }
-  | NULL      { Null }
-  | typ TIMES { Pointer($1) }
+    INT                    { Int }
+  | BOOL                   { Bool }
+  | CHAR                   { Char }
+  | STRING                 { String }
+  | NULL                   { Null }
+  | typ LBRACK expr RBRACK { Array($1, $3) }
 
 /*** Statements ***/
 
@@ -100,6 +100,7 @@ expr:
   | FALSE                         { BoolLit(false) }
   | ID                            { Id($1) }
   | STRINGLIT                     { StringLit($1) }
+  | ID LBRACK expr RBRACK         { Access($1, $3) }
   | LPAREN expr RPAREN            { $2 }
   | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
 

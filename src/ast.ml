@@ -14,10 +14,6 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Char | String | Null | Pointer of typ
-
-type bind = typ * string
-
 type expr =
     Id of string
   | Call of string * expr list
@@ -27,7 +23,12 @@ type expr =
   | Assign of string * expr
   | Binop of expr * op * expr
   | Unop of uop * expr
+  | Access of string * expr
   | NoExpr
+
+type typ = Int | Bool | Char | String | Null | Array of typ * expr
+
+type bind = typ * string
 
 type stmt =
     Block of stmt list
