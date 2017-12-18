@@ -151,8 +151,8 @@ let translate (program) =
   | A.Binop (e1, op, e2) ->
 	  let e1' = expr builder e1
      and e2' = expr builder e2 in
-     (* let bool_e1 = if (L.type_of e1' str_t) then true else false in
-     let bool_e2 = if (L.type_of e2' str_t) then true else false in *)
+     let bool_e1 = if (L.type_of e1' str_t) then true else false in
+     let bool_e2 = if (L.type_of e2' str_t) then true else false in
       (* if (bool_e1 || bool_e2) then
         (* (if (bool_e1 && !bool_e2) || (!bool_e1 && bool_e2) then
            (*concatenate strings*)
