@@ -1,1 +1,4 @@
-println(4342);
+println(3);
+println("hellooo");
+println("sooooooooo hmm");
+println(true);
