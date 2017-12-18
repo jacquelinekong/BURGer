@@ -1,6 +1,8 @@
-int i;
-bool b;
+int y = 8;
 
-i = 4;
-b = true;
+int i = 4;
+int b = 2;
 i = b;
+
+println(b);
+println(y);

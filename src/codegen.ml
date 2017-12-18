@@ -128,7 +128,8 @@ let translate (program) =
       let function_locals =
         let get_locals_from_fbody function_body =
           let get_vdecl locals_list stmt = match stmt with
-              A.VDecl(typ, string) -> (typ, string) :: locals_list
+                A.VDecl(typ, string) -> (typ, string) :: locals_list
+              | A.VAssign((typ, string), _) -> (typ, string) :: locals_list
               | _ -> locals_list
           in
           List.fold_left get_vdecl [] function_body
