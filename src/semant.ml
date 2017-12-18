@@ -82,12 +82,19 @@ let check_program program =
     | _ -> ()
   in
 
-  let built_in_decls =  StringMap.singleton "print"
-     { typ = Null; fname = "print"; formals = [(String, "x")]; body = [] }
-   in
+  (* let built_in_decls =  StringMap.add "println"
+      { typ = Null; fname = "println"; formals = [(, "x")]; body = [] }
+      ( StringMap.singleton "print"
+       { typ = Null; fname = "print"; formals = [(Null, "x")]; body = [] })
+
+  in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
                          built_in_decls functions
+     in*)
+
+  let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
+                         StringMap.empty functions
   in
 
   let function_decl s = try StringMap.find s function_decls
@@ -151,8 +158,8 @@ let check_program program =
        else
          List.iter2 (fun (ft, _) e -> let et = expr e in
             ignore (check_assign ft et
-              (Failure ("illegal actual argument found " ^ string_of_typ et ^
-              " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
+              (Failure ("illegal actual argument: found " ^ string_of_typ et ^
+              " ; expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
            fd.formals actuals;
          fd.typ
   in

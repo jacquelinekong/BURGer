@@ -44,7 +44,7 @@ rule token = parse
   | "false"            { FALSE }
   | "int"              { INT }
   | "char"             { CHAR }
-  | "string"           { STRING }
+  | "String"           { STRING }
   | "bool"             { BOOL }
   | "null"             { NULL }
   | "return"           { RETURN }

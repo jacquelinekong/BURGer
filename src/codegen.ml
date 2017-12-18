@@ -52,12 +52,22 @@ let translate (program) =
       | _ -> failwith "not turned into global") global_list
   in
 
-  let functions =
+  (* let not_globals = *)
+      let not_globals_list = List.filter (fun x -> match x with
+        A.VDecl(x) -> false
+      (* | A.VAssign(x) -> false *)
+      | _ -> true) stmt_list in
+      (* in List.map (fun x -> match x with
+            A.VAssign((typ, string), expr) -> A.Stmt(string, expr)
+        ) not_globals_list *)
+  (* in *)
+
+let functions =
     let fdecl_main = A.Function({
            typ = A.Int;
            fname = "main";
            formals = [];
-           body = List.rev(A.Return(A.IntLit(0)) :: List.rev(stmt_list))
+           body = List.rev(A.Return(A.IntLit(0)) :: List.rev(not_globals_list))
          })
     in
       let functions_as_items = List.filter (fun x -> match x with
@@ -110,6 +120,7 @@ let translate (program) =
     let int_format_str_ln = L.build_global_stringptr "%d\n" "fmt" builder in
     let int_format_str = L.build_global_stringptr "%d" "fmt" builder in
 
+
     let local_vars =
       let add_formal var_map (formal_type, formal_name) param = L.set_value_name formal_name param;
       	let local = L.build_alloca (ltype_of_typ formal_type) formal_name builder in
@@ -128,8 +139,12 @@ let translate (program) =
       let function_locals =
         let get_locals_from_fbody function_body =
           let get_vdecl locals_list stmt = match stmt with
-                A.VDecl(typ, string) -> (typ, string) :: locals_list
-              | A.VAssign((typ, string), _) -> (typ, string) :: locals_list
+              A.VDecl(typ, string) -> (typ, string) :: locals_list
+            | A.VAssign((typ, string), _) -> if (fdecl.A.fname = "main")
+                then
+                  locals_list
+                else
+                  (typ, string) :: locals_list
               | _ -> locals_list
           in
           List.fold_left get_vdecl [] function_body
