@@ -151,20 +151,14 @@ let translate (program) =
   | A.Binop (e1, op, e2) ->
 	  let e1' = expr builder e1
      and e2' = expr builder e2 in
-     let bool_e1 = if (L.type_of e1' str_t) then true else false in
-     let bool_e2 = if (L.type_of e2' str_t) then true else false in
-      (* if (bool_e1 || bool_e2) then
-        (* (if (bool_e1 && !bool_e2) || (!bool_e1 && bool_e2) then
-           (*concatenate strings*)
-        else
-          (*convert int to string*)
-        ) *)
-       (match op with
-          A.Add -> (*sprintf ???*)
-       ) (is_string e1') (is_string e2') "tmp" builder *)
-     (* else *)
   	  (match op with
-        A.Add     -> L.build_add
+        A.Add     ->
+          let string_concat =
+            if (L.type_of e1' str_t || L.type_of e2' str_t) then
+              (if (L.type_of e1' str_t) then int_format_str e2 else int_format_str e1)
+          in
+              L.build_call sprintf_func [| string_concat; e1'; e2' |] "sprintf" builder
+            else L.build_add
   	  | A.Sub     -> L.build_sub
   	  | A.Mult    -> L.build_mul
       | A.Div     -> L.build_sdiv
