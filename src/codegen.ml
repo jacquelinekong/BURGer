@@ -85,6 +85,9 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
+  let println_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+  let println_func = L.declare_function "println" println_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl map fdecl =
@@ -169,6 +172,12 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
              A.StringLit test -> L.build_call printf_func [| (expr builder s) |] "print" builder
             | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "print" builder
           )
+      | A.Call("println", [s]) -> L.build_call println_func [| (expr builder s) |] "println" builder
+        (* let test2 = s in (match s with
+              A.StringLit test2 -> L.build_call println_func [| (expr builder s) |] "println" builder
+            | _ -> L.build_call println_func [| int_format_str ; (expr builder s) |] "println" builder
+          ) *)
+      (* | A.Call("println", [s]) ->  *)
       (* | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
          "print" builder
       *)
