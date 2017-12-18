@@ -3,8 +3,9 @@
 * Jordan Lee
 * Jacqueline Kong
 *)
-
-{ open Parser }
+{ open Parser
+  module B = Buffer
+}
 
 let escape = '\\' ['\\' ''' '"' 'n' 'r' 't']
 let ascii = ([' '-'!' '#'-'[' ']'-'~'])

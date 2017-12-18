@@ -6,3 +6,7 @@ void println(char *s)
 {
   printf("%s\r\n", s);
 }
+
+void sprintf(char *buffer, int c, char *s) {
+  
+}
