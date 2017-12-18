@@ -105,8 +105,17 @@ let check_program program =
     if List.mem "print" (List.map (fun fd -> fd.fname) functions)
       then raise (Failure ("function print may not be defined")) else ();
 
+    if List.mem "println" (List.map (fun fd -> fd.fname) functions)
+      then raise (Failure ("function println may not be defined")) else ();
+
+      if List.mem "printf" (List.map (fun fd -> fd.fname) functions)
+        then raise (Failure ("function printf may not be defined")) else ();
+
     report_duplicate (fun n -> "duplicate function " ^ n)
       (List.map (fun fd -> fd.fname) functions);
+
+      if List.mem "main" (List.map (fun fd -> fd.fname) functions)
+        then raise (Failure ("function main may not be defined")) else ();
 
 
 
@@ -153,6 +162,10 @@ let check_program program =
     | Expr e -> ignore (expr e)
 
   in
+
+
+
+
   (* Check for assignments and duplicate vdecls *)
   List.iter check_function functions;
   List.iter check_stmt stmt_list;

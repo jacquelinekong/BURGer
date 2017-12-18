@@ -1,6 +1,7 @@
 int i;
 i = 0;
 while(i<<5){
-	print("pls");
-	print("help");
+	println("pls");
+	println("help");
+	i = i+1;
 }

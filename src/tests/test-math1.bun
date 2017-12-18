@@ -1,17 +1,13 @@
 
 int a;
 a = 2*7+1;
-if(a == 15){
-  print("15");
-}
+println(a);
+
 
 int b;
 b = 2*(7+1);
-if(b==16){
-  print("16");
-}
+println(b);
+
 int c;
 c = a+b;
-if(c==31){
-  print("31");
-}
+println(c);

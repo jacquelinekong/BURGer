@@ -1,24 +1,16 @@
 int b;
 b = 5;
-int foo(){
+def int foo(){
 	int a;
 	a = b+5;
 	return a;
 	}
 
-int bar(){
+def int bar(){
 	int b;
 	b = 2;
 	return foo();
 	}
 
-int x;
-x = foo();
-if(x == 10){
- print("yay")
-}
-int y;
-y = bar();
-if(y==10){
-	print("woo");
-}
+println(foo());
+println(bar());
