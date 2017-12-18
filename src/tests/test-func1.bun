@@ -1,9 +1,4 @@
 def int add(int a) {
-	int y;
-	y = 2;
 	return a;
 }
-bool x;
-x = 3;
-add(2);
-print(322);
+println(add(4));

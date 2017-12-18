@@ -1,0 +1,4 @@
+def int check(int a){
+	return a;
+	int x;
+	}

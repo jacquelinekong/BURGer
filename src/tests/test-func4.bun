@@ -2,23 +2,27 @@ def string ret1(string s){
 	return s;
 	}
 
-string t = ret1("omg");
-print(t);
+string t;
+t = ret1("omg");
+println(t);
 
 def char ret2(char c){
 	return c;
 	}
-char ch = ret2("h");
-print(ch);
+char ch;
+ch = ret2("h");
+println(ch);
 
 def double ret3(double d){
 	return d;
 	}
-double doub = ret3(4.25);
-print(doub);
+double doub;
+doub = ret3(4.25);
+println(doub);
 
 def int ret4(int i){
 	return i;
 	}
-int a = ret4(5);
-print(a);
+int a;
+a = ret4(5);
+println(a);

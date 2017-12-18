@@ -1,0 +1,3 @@
+def null printf(){
+	print("what");
+	}

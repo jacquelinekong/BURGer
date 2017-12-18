@@ -1,23 +1,16 @@
 int b;
-println(b);
+b = 5;
+def int foo(){
+	int a;
+	a = b+5;
+	return a;
+	}
 
-def int foo()
-{
-	print("b in foo is: ");
-	println(b);
-   int a = b + 5;
-   return b;
-}
+def int bar(){
+	int b;
+	b = 2;
+	return foo();
+	}
 
-def int bar()
-{
-	print("b in bar is: ");
-	println(b);
-   int b = 2;
-   return foo();
-}
-
-print("b in main is: ");
-println(b);
-
-println(foo()); println(bar());
+println(foo());
+println(bar());

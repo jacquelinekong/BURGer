@@ -1,7 +1,7 @@
 def void testPrint(int a, double b, char c, string d){
-	print(a);
-	print(b);
-	print(c);
-	print(d);
+	println(a);
+	println(b);
+	println(c);
+	println(d);
 	}
 testPrint(4, 3.54, "c", "hello");

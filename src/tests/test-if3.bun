@@ -1,10 +1,10 @@
 if(true){
-	print("hi");
+	println("hi");
 	if(true){
-		print("idk");
+		println("idk");
 		}
 		if(false){
 			print("what");
 		}
-	
+
 }
