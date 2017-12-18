@@ -3,8 +3,8 @@
 * Jordan Lee
 * Jacqueline Kong
 *)
-
-{ open Parser }
+{ open Parser
+}
 
 let escape = '\\' ['\\' ''' '"' 'n' 'r' 't']
 let ascii = ([' '-'!' '#'-'[' ']'-'~'])
@@ -56,3 +56,4 @@ rule token = parse
 
 and comment = parse
   "*/"                 { token lexbuf }
+  | _                  { comment lexbuf }

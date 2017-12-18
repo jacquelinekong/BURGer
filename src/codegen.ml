@@ -12,12 +12,7 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
-(* external print_s: s -> unit = "caml_print_string"
-external print_i: i -> unit = "caml_print_int" *)
-
-
-(* passing in a program for hello world *)
-let translate (program) = (* QUESTION: will we always only pass in a program bc we allow top-level code? *)
+let translate (program) =
   let context = L.global_context () in
     let the_module = L.create_module context "BURGer"
     and i8_t = L.i8_type context
@@ -73,8 +68,7 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
           | _ -> failwith "function casting didn't work") all_functions_as_items
   in
 
-  (*after you figure out which items are statements, you need to go through the statements
-    and figure out which ones contain the variables*)
+  (*store the global variables in a string map*)
   let global_vars =
   let global_var map (t, n) =
     let init = L.const_int (ltype_of_typ t) 0
@@ -82,11 +76,17 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
   List.fold_left global_var StringMap.empty globals in
 
   (* printf() declaration *)
+  let print_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+  let print_func = L.declare_function "print" print_t the_module in
+
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
   let println_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let println_func = L.declare_function "println" println_t the_module in
+
+  (* let sprintf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t; L.i32_type i32_t; L.pointer_type i8_t |] in
+  let sprintf_func = L.declare_function "sprintf" sprintf_t the_module in *)
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -105,7 +105,8 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
     let (the_function, _) = StringMap.find fdecl.A.fname function_decls in
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
-    let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
+    let int_format_str_ln = L.build_global_stringptr "%d\n" "fmt" builder in
+    let int_format_str = L.build_global_stringptr "%d" "fmt" builder in
 
     let local_vars =
       let add_formal var_map (formal_type, formal_name) param = L.set_value_name formal_name param;
@@ -137,74 +138,87 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
                    with Not_found -> StringMap.find n global_vars
   in
 
-      let rec expr builder = function
-        A.StringLit e -> L.build_global_stringptr e "str" builder
-      | A.IntLit i -> L.const_int i32_t i
-      | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
-      | A.NoExpr -> L.const_int i32_t 0
-      | A.Id s -> L.build_load (lookup s) s builder
-      | A.Binop (e1, op, e2) ->
-    	  let e1' = expr builder e1
-    	  and e2' = expr builder e2 in
-    	  (match op with
-    	    A.Add     -> L.build_add
-    	  | A.Sub     -> L.build_sub
-    	  | A.Mult    -> L.build_mul
-        | A.Div     -> L.build_sdiv
-    	  | A.And     -> L.build_and
-    	  | A.Or      -> L.build_or
-    	  | A.Equal   -> L.build_icmp L.Icmp.Eq
-    	  | A.Neq     -> L.build_icmp L.Icmp.Ne
-    	  | A.Less    -> L.build_icmp L.Icmp.Slt
-    	  | A.Leq     -> L.build_icmp L.Icmp.Sle
-    	  | A.Greater -> L.build_icmp L.Icmp.Sgt
-    	  | A.Geq     -> L.build_icmp L.Icmp.Sge
-    	  ) e1' e2' "tmp" builder
-      (* | A.Unop(op, e) ->
-    	  let e' = expr builder e in
-      	  (match op with
-      	    A.Neg     -> L.build_neg
-          | A.Not     -> L.build_not) e' "tmp" builder *)
-      | A.Assign (s, e) -> let e' = expr builder e in
-        ignore (L.build_store e' (lookup s) builder); e'
-      | A.Call ("print", [s]) ->
-        let test = s in (match s with
-             A.StringLit test -> L.build_call printf_func [| (expr builder s) |] "print" builder
-            | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "print" builder
-          )
-      | A.Call("println", [s]) -> L.build_call println_func [| (expr builder s) |] "println" builder
-        (* let test2 = s in (match s with
-              A.StringLit test2 -> L.build_call println_func [| (expr builder s) |] "println" builder
-            | _ -> L.build_call println_func [| int_format_str ; (expr builder s) |] "println" builder
-          ) *)
-      (* | A.Call("println", [s]) ->  *)
-      (* | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
-         "print" builder
-      *)
+  let is_string s =
+    if L.type_of s = str_t then s else (L.const_inttoptr s str_t)
+  in
 
-      (* | A.Call ("print", [s]) -> L.build_call printf_func [| (expr builder s) |] "print" builder
-         | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
-                                        "print" builder *)
+  let rec expr builder = function
+    A.StringLit e -> L.build_global_stringptr e "str" builder
+  | A.IntLit i -> L.const_int i32_t i
+  | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
+  | A.NoExpr -> L.const_int i32_t 0
+  | A.Id s -> L.build_load (lookup s) s builder
+  | A.Binop (e1, op, e2) ->
+	  let e1' = expr builder e1
+     and e2' = expr builder e2 in
+     let bool_e1 = if (L.type_of e1' str_t) then true else false in
+     let bool_e2 = if (L.type_of e2' str_t) then true else false in
+      (* if (bool_e1 || bool_e2) then
+        (* (if (bool_e1 && !bool_e2) || (!bool_e1 && bool_e2) then
+           (*concatenate strings*)
+        else
+          (*convert int to string*)
+        ) *)
+       (match op with
+          A.Add -> (*sprintf ???*)
+       ) (is_string e1') (is_string e2') "tmp" builder *)
+     (* else *)
+  	  (match op with
+        A.Add     -> L.build_add
+  	  | A.Sub     -> L.build_sub
+  	  | A.Mult    -> L.build_mul
+      | A.Div     -> L.build_sdiv
+  	  | A.And     -> L.build_and
+  	  | A.Or      -> L.build_or
+  	  | A.Equal   -> L.build_icmp L.Icmp.Eq
+  	  | A.Neq     -> L.build_icmp L.Icmp.Ne
+  	  | A.Less    -> L.build_icmp L.Icmp.Slt
+  	  | A.Leq     -> L.build_icmp L.Icmp.Sle
+  	  | A.Greater -> L.build_icmp L.Icmp.Sgt
+  	  | A.Geq     -> L.build_icmp L.Icmp.Sge
+  	  ) e1' e2' "tmp" builder
+  (* | A.Unop(op, e) ->
+	  let e' = expr builder e in
+  	  (match op with
+  	    A.Neg     -> L.build_neg
+      | A.Not     -> L.build_not) e' "tmp" builder *)
+  | A.Assign (s, e) -> let e' = expr builder e in
+    ignore (L.build_store e' (lookup s) builder); e'
+  | A.Call ("print", [s]) ->
+    let test = s in (match s with
+         A.StringLit test -> L.build_call print_func [| (expr builder s) |] "print" builder
+        | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "printf" builder
+      )
+  | A.Call("println", [s]) ->
+    let test = s in (match s with
+          A.StringLit test -> L.build_call println_func [| (expr builder s) |] "print" builder
+        | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
+      )
+  (* | A.Call("sprintf", [s]) ->
+    let buffer = s in (match s with
+          A.IntLit buffer -> L.build_call sprintf_func [| int_format_str ; (expr builder s)|] "sprintf" builder
+        | A.StringLit buffer -> L.build_call sprintf_func [| (expr builder s) |] "sprintf" builder
+      ) *)
 
-      (* let int_format_str builder = L.build_global_stringptr "%d\n" "fmt" llbuilder;
-         and str_format_str builder = L.build_global_stringptr "%s\n" "fmt" llbuilder in
+  (* let int_format_str builder = L.build_global_stringptr "%d\n" "fmt" llbuilder;
+     and str_format_str builder = L.build_global_stringptr "%s\n" "fmt" llbuilder in
 
-         let format_str s_typ builder = match s_typ with
-          A.Int -> int_format_str builder
-         | A.String -> str_format_str builder
-         | _ -> raise (Failure "Invalid printf type")
-         in
+     let format_str s_typ builder = match s_typ with
+      A.Int -> int_format_str builder
+     | A.String -> str_format_str builder
+     | _ -> raise (Failure "Invalid printf type")
+     in
 
-         let e' = expr builder e
-         and e_type =
-         L.build_call printf_func [| format_str e_type llbuilder; e' |]
-         "printf" builder *)
-      | A.Call (f, act) ->
-        let (fdef, fdecl) = StringMap.find f function_decls in
-  	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-  	 let result = (match fdecl.A.typ with A.Null -> ""
-                                              | _ -> f ^ "_result") in
-           L.build_call fdef (Array.of_list actuals) result builder
+     let e' = expr builder e
+     and e_type =
+     L.build_call printf_func [| format_str e_type llbuilder; e' |]
+     "printf" builder *)
+  | A.Call (f, act) ->
+    let (fdef, fdecl) = StringMap.find f function_decls in
+ let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+ let result = (match fdecl.A.typ with A.Null -> ""
+                                          | _ -> f ^ "_result") in
+       L.build_call fdef (Array.of_list actuals) result builder
   in
 
   (* Invoke "f builder" if the current block doesn't already
