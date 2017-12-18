@@ -136,37 +136,6 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
 
       let rec expr builder = function
         A.StringLit e -> L.build_global_stringptr e "str" builder
-      | A.Call ("print", [s]) ->
-        let test = s in (match s with
-          A.Id test -> L.build_call printf_func [| (expr builder s) |] "print" builder
-        | A.StringLit test -> L.build_call printf_func [| (expr builder s) |] "print" builder
-        | A.IntLit test -> L.build_call printf_func [| int_format_str ; (expr builder s) |]
-                             "print" builder
-          )
-        (* | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
-           "print" builder
-
-           | A.BoolLit test -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "print" builder
-        *)
-
-      (* | A.Call ("print", [s]) -> L.build_call printf_func [| (expr builder s) |] "print" builder
-      | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
-                                        "print" builder *)
-
-        (* let int_format_str builder = L.build_global_stringptr "%d\n" "fmt" llbuilder;
-        and str_format_str builder = L.build_global_stringptr "%s\n" "fmt" llbuilder in
-
-        let format_str s_typ builder = match s_typ with
-            A.Int -> int_format_str builder
-          | A.String -> str_format_str builder
-          | _ -> raise (Failure "Invalid printf type")
-        in
-
-        let e' = expr builder e
-        and e_type =
-        L.build_call printf_func [| format_str e_type llbuilder; e' |]
-          "printf" builder *)
-
       | A.IntLit i -> L.const_int i32_t i
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.NoExpr -> L.const_int i32_t 0
@@ -194,7 +163,33 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       	    A.Neg     -> L.build_neg
           | A.Not     -> L.build_not) e' "tmp" builder *)
       | A.Assign (s, e) -> let e' = expr builder e in
-    	                   ignore (L.build_store e' (lookup s) builder); e'
+        ignore (L.build_store e' (lookup s) builder); e'
+      | A.Call ("print", [s]) ->
+        let test = s in (match s with
+             A.StringLit test -> L.build_call printf_func [| (expr builder s) |] "print" builder
+            | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "print" builder
+          )
+      (* | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
+         "print" builder
+      *)
+
+      (* | A.Call ("print", [s]) -> L.build_call printf_func [| (expr builder s) |] "print" builder
+         | A.Call ("print_int", [s]) ->  L.build_call printf_func [| int_format_str ; (expr builder s) |]
+                                        "print" builder *)
+
+      (* let int_format_str builder = L.build_global_stringptr "%d\n" "fmt" llbuilder;
+         and str_format_str builder = L.build_global_stringptr "%s\n" "fmt" llbuilder in
+
+         let format_str s_typ builder = match s_typ with
+          A.Int -> int_format_str builder
+         | A.String -> str_format_str builder
+         | _ -> raise (Failure "Invalid printf type")
+         in
+
+         let e' = expr builder e
+         and e_type =
+         L.build_call printf_func [| format_str e_type llbuilder; e' |]
+         "printf" builder *)
       | A.Call (f, act) ->
         let (fdef, fdecl) = StringMap.find f function_decls in
   	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
@@ -247,19 +242,9 @@ let translate (program) = (* QUESTION: will we always only pass in a program bc 
       ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
       L.builder_at_end context merge_bb
 
-      (* | A.For (e1, e2, e3, body) -> stmt builder ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] ) *)
+      | A.For (e1, e2, e3, body) -> stmt builder ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
   in
-      (* let ftype = L.function_type null_t [| |] in
-      (* Define main function so that we can have top-level code *)
-      let funct = L.define_function "main" ftype the_module in
-      let builder = L.builder_at_end context (L.entry_block funct) in
-      (* List.iter item builder program; *)
-      L.build_ret_void builder; (*List.iter buildprogrambody items; this is one of the first functions we define*)
-  in the_module  *)
-  (* let rec item builder = function
-      A.Stmt s -> ignore(stmt builder s); builder
-    | A.Function f -> build_function_body f
-  in *)
+
    (* Build the code for each statement in the function *)
   let builder = stmt builder (A.Block fdecl.A.body) in
 

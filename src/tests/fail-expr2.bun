@@ -1,0 +1,8 @@
+int a;
+a = 4;
+bool b;
+b = true;
+
+if(a == b){
+  print("wrong");
+}

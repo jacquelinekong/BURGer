@@ -1,0 +1,11 @@
+if(false){
+	print("no");
+	}
+elseif(true){
+	print("yes");
+	}
+else{
+	print("why");
+	}
+
+	

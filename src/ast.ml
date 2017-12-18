@@ -14,7 +14,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Char | String | Null
+type typ = Int | Bool | Char | String | Null | Pointer of typ
 
 type bind = typ * string
 
@@ -36,7 +36,7 @@ type stmt =
   | Return of expr
   | If of expr * stmt * stmt
   | While of expr * stmt
-  | For of bind * expr * expr * stmt
+  | For of expr * expr * expr * stmt
 
 type func_decl = {
     typ : typ;

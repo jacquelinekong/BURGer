@@ -1,0 +1,6 @@
+if(true){
+	print("what");
+}
+else{
+	print("wtf");
+}

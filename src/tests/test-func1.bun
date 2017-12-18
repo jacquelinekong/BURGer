@@ -3,6 +3,7 @@ def int add(int a) {
 	y = 2;
 	return a;
 }
-int x;
+bool x;
+x = 3;
 add(2);
-print("hello");
+print(322);

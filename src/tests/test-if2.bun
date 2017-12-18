@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 if(true){
 	int x;
 	int y;
 	print("fff");
+=======
+if(1<<3){
+	print("YES");
+	print("HI");
+>>>>>>> df7aa8ce803a26f55fb46b7bf80eba0d0f5ae86f
 	}
 else{
 	print("NO");
