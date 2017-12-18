@@ -12,10 +12,10 @@ void print(char *s){
       printf("\n");
       i++;
     }
-    // else if (c == '\\' && s[i+1] == 't'){
-    //   printf("\t");
-    //   i++;
-    // }
+    else if (c == '\\' && s[i+1] == 't'){
+      printf("\t");
+      i++;
+    }
     else
       printf("%c", c);
     i++;
