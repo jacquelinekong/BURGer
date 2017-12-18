@@ -1,0 +1,3 @@
+def null print(){
+	print("hi");
+}

@@ -1,12 +1,10 @@
 (* Semantic checking for the MicroC compiler *)
-
 open Ast
 
 module StringMap = Map.Make(String)
 
 (* Semantic checking of a program. Returns void if successful,
    throws an exception if something is wrong.
-
    Check each global variable, then check each function *)
 
 let check_program program =
@@ -51,6 +49,7 @@ let check_program program =
             Ast.Function(x) -> x
           | _ -> failwith "function casting didn't work") all_functions_as_items
   in
+
 
   (* let function_locals =
     let get_locals_from_fbody fdecl =
@@ -103,6 +102,14 @@ let check_program program =
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
       (List.map snd func.formals);
 
+    if List.mem "print" (List.map (fun fd -> fd.fname) functions)
+      then raise (Failure ("function print may not be defined")) else ();
+
+    report_duplicate (fun n -> "duplicate function " ^ n)
+      (List.map (fun fd -> fd.fname) functions);
+
+
+
     (* List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
       " in " ^ func.fname)) func.locals; *)
 
@@ -151,30 +158,21 @@ let check_program program =
   List.iter check_stmt stmt_list;
   report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals);
 
+
 (*
-
-
   (* Raise an exception if a given binding is to a void type *)
   let check_not_void exceptf = function
       (Void, n) -> raise (Failure (exceptf n))
     | _ -> ()
   in
-
-
   (**** Checking Global Variables ****)
-
   List.iter (check_not_void (fun n -> "illegal void global " ^ n)) globals;
-
   report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd globals);
-
   (**** Checking Functions ****)
-
   if List.mem "print" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function print may not be defined")) else ();
-
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.fname) functions);
-
   (* Function declaration for a named function *)
   let built_in_decls =  StringMap.add "print"
      { typ = Void; fname = "print"; formals = [(Int, "x")];
@@ -184,32 +182,22 @@ let check_program program =
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
        locals = []; body = [] })) *)
    in
-
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
                          built_in_decls functions
   in
-
   let function_decl s = try StringMap.find s function_decls
        with Not_found -> raise (Failure ("unrecognized function " ^ s))
   in
-
   let _ = function_decl "main" in (* Ensure "main" is defined *)
-
   let check_function func =
-
     List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
       " in " ^ func.fname)) func.formals;
-
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
       (List.map snd func.formals);
-
     List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
       " in " ^ func.fname)) func.locals;
-
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
       (List.map snd func.locals);
-
-
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
     	Literal _ -> Int
@@ -249,11 +237,9 @@ let check_program program =
                  fd.formals actuals;
                fd.typ
     in
-
     let check_bool_expr e = if expr e != Bool
      then raise (Failure ("expected Boolean expression in " ^ string_of_expr e))
      else () in
-
     (* Verify a statement or throw an exception *)
     let rec stmt = function
 	    Block sl -> let rec check_block = function
@@ -267,12 +253,10 @@ let check_program program =
       | Return e -> let t = expr e in if t = func.typ then () else
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                          string_of_typ func.typ ^ " in " ^ string_of_expr e))
-
       | If(p, b1, b2) -> check_bool_expr p; stmt b1; stmt b2
       | For(e1, e2, e3, st) -> ignore (expr e1); check_bool_expr e2;
                                ignore (expr e3); stmt st
       | While(p, s) -> check_bool_expr p; stmt s
     in
-
     stmt (Block func.body)
 *)

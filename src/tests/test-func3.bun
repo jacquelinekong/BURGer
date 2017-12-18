@@ -1,8 +1,36 @@
-def int add(int a, int b){
+def null add(int a, int b){
 	int r;
 	r = a+b;
-	return r;
+	if(r == 78){
+		print("78");
+		}
+	r = a-b;
+	if(r==14){
+		print("14");
+		}
+
+	r = a*b;
+	if(r==1472){
+		print("1472");
 	}
 
-a = (46, 32);
-print(a);
+	if(a>>b){
+		print("works");
+	}
+	if(a<<b){
+		print("wrong");
+	}
+	if(a>=b){
+		print("yes");
+	}
+	if(a<=b){
+		print("no");
+	}
+
+	if(a!=b){
+	 print("yas");
+	}
+
+	}
+
+add(46, 32);

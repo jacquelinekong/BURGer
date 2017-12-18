@@ -12,6 +12,13 @@ int bar(){
 	return foo();
 	}
 
-foo();
-bar();
-
+int x;
+x = foo();
+if(x == 10){
+ print("yay")
+}
+int y;
+y = bar();
+if(y==10){
+	print("woo");
+}
