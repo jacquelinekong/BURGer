@@ -155,12 +155,13 @@ let translate (program) =
      and e2' = expr builder e2 in
   	  (match op with
         A.Add     ->
-          let string_concat =
+          (* let string_concat =
             if (L.type_of e1' str_t || L.type_of e2' str_t) then
               (if (L.type_of e1' str_t) then int_format_str e2 else int_format_str e1)
           in
               L.build_call sprintf_func [| string_concat; e1'; e2' |] "sprintf" builder
-            else L.build_add
+else *)
+  L.build_add
   	  | A.Sub     -> L.build_sub
   	  | A.Mult    -> L.build_mul
       | A.Div     -> L.build_sdiv
@@ -227,7 +228,7 @@ let translate (program) =
 
     let rec stmt builder = function
       A.Block sl -> List.fold_left stmt builder sl
-    |  A.Expr e -> ignore(expr builder e); builder
+    | A.Expr e -> ignore(expr builder e); builder
     | A.VDecl (typ, string) -> builder
     | A.VAssign ((typ, string), e) -> ignore(expr builder (A.Assign(string, e))); builder
     | A.Return e -> ignore (match fdecl.A.typ with
