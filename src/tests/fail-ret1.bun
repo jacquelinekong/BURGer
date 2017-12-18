@@ -1,0 +1,4 @@
+def null check(){
+	return 4;
+	}
+	

@@ -1,6 +1,7 @@
-def int add(int a){
-	return a;
-	}
-def int add(int b){
-	return b;
-	}
+def int check(int a){
+  return a;
+}
+
+def int check(int b){
+  return b;
+}

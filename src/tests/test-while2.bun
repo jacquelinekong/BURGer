@@ -7,7 +7,4 @@ def int idk(int a){
 	}
 	return j;
 }
-
-int r;
-r = idk(5);
-print(r);
+print(idk(5));

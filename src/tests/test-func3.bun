@@ -1,8 +1,31 @@
-def int add(int a, int b){
+def null add(int a, int b){
 	int r;
 	r = a+b;
-	return r;
+	println(r);
+
+	r = a-b;
+	println(r);
+
+	r = a*b;
+	println(r);
+
+	if(a>>b){
+		println("works");
+	}
+	if(a<<b){
+		println("wrong");
+	}
+	if(a>=b){
+		println("yes");
+	}
+	if(a<=b){
+		println("no");
 	}
 
-a = (46, 32);
-print(a);
+	if(a!=b){
+	 println("yas");
+	}
+
+}
+
+add(46, 32);

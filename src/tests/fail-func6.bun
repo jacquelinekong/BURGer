@@ -1,0 +1,3 @@
+def null main(){
+	print("hi");
+}
