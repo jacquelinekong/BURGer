@@ -205,7 +205,7 @@ else *)
   | A.Call("println", [s]) ->
     let test = s in (match s with
           A.StringLit test -> L.build_call println_func [| (expr builder s) |] "println" builder
-        | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
+        | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "printf" builder
       )
   (* | A.Call("sprintf", [s]) ->
     let buffer = s in (match s with

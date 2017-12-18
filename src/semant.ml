@@ -82,20 +82,20 @@ let check_program program =
     | _ -> ()
   in
 
-  (* let built_in_decls =  StringMap.add "println"
-      { typ = Null; fname = "println"; formals = [(, "x")]; body = [] }
+  let built_in_decls =  StringMap.add "println"
+      { typ = Null; fname = "println"; formals = [(String, "x")]; body = [] }
       ( StringMap.singleton "print"
-       { typ = Null; fname = "print"; formals = [(Null, "x")]; body = [] })
+       { typ = Null; fname = "print"; formals = [(String, "x")]; body = [] })
 
   in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
                          built_in_decls functions
-     in*)
+     in
 
-  let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
+  (* let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
                          StringMap.empty functions
-  in
+  in *)
 
   let function_decl s = try StringMap.find s function_decls
        with Not_found -> raise (Failure ("unrecognized function " ^ s))
@@ -136,6 +136,7 @@ let check_program program =
   let rec expr = function
       IntLit _ -> Int
     | BoolLit _ -> Bool
+    | StringLit _ -> String
     | Id s -> type_of_identifier s
     | Assign(var, e) as ex -> let lt = type_of_identifier var
                               and rt = expr e in
