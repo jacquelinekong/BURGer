@@ -82,9 +82,11 @@ let check_program program =
     | _ -> ()
   in
 
-  let built_in_decls = StringMap.singleton "print"
-    { typ = Null; fname = "print"; formals = [(String, "x")];
-     body = [] }
+  let built_in_decls = StringMap.add "println"
+      { typ = Null; fname = "println"; formals = []; body = [] }
+      (StringMap.singleton "print"
+    { typ = Null; fname = "print"; formals = [];
+      body = [] })
   in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -96,7 +98,6 @@ let check_program program =
   in
 
   let check_function func =
-
 
 
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
@@ -148,16 +149,20 @@ let check_program program =
             string_of_typ t2 ^ " in " ^ string_of_expr e))
       )
     | Call(fname, actuals) as call -> let fd = function_decl fname in
-       if List.length actuals != List.length fd.formals then
+      if (fname = "print" || fname = "println")
+             then
+                 let _ = List.iter (fun e -> ignore(expr e)) actuals in Null
+      else
+          (if List.length actuals != List.length fd.formals then
          raise (Failure ("expecting " ^ string_of_int
            (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
-       else
-         List.iter2 (fun (ft, _) e -> let et = expr e in
-            ignore (check_assign ft et
-              (Failure ("illegal actual argument: found " ^ string_of_typ et ^
-              " ; expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
-           fd.formals actuals;
-         fd.typ
+         else
+           List.iter2 (fun (ft, _) e -> let et = expr e in
+              ignore (check_assign ft et
+                (Failure ("illegal actual argument: found " ^ string_of_typ et ^
+                " ; expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
+             fd.formals actuals;
+         fd.typ)
     | Unop(op, e) as ex -> let t = expr e in
       (match op with
  	      Neg when t = Int -> Int
