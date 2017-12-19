@@ -19,8 +19,6 @@ rule token = parse
   | string             { STRINGLIT(s) }
   | '{'                { LBRACE }
   | '}'                { RBRACE }
-  | '['                { LBRACK }
-  | ']'                { RBRACK }
   | ','                { COMMA }
   | '+'                { PLUS }
   | '-'                { MINUS }
@@ -28,8 +26,8 @@ rule token = parse
   | '/'                { DIVIDE }
   | '%'                 { MOD }
   | '='                { ASSIGN }
-  | "<"               { LT }
-  | ">"               { GT }
+  | "<"                { LT }
+  | ">"                { GT }
   | "=="               { EQ }
   | "!="               { NEQ }
   | "<="               { LEQ }
@@ -39,7 +37,6 @@ rule token = parse
   | "!"                { NOT }
   | "if"               { IF }
   | "else"             { ELSE }
-  | "for"              { FOR }
   | "while"            { WHILE }
   | "true"             { TRUE }
   | "false"            { FALSE }
