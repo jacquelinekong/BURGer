@@ -77,7 +77,7 @@ stmt_list:
 /*** Expressions ***/
 
 expr:
-    NEG expr                      { Unop(Neg, $2) }
+    MINUS expr                      { Unop(Neg, $2) }
   | NOT expr                      { Unop(Not, $2) }
   | ID ASSIGN expr                { Assign($1, $3) }
   | expr PLUS   expr              { Binop($1, Add,   $3) }
