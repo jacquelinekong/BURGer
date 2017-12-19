@@ -14,6 +14,14 @@ def int countFactors(int num) {
   return number_of_factors;
 }
 
+def null printFactor(int count, int current_num) {
+  print("This is a factor of ");
+  print(current_num);
+  print(": ");
+  println(count);
+  count = count + 1;
+}
+
 def bool checkPrime(int num) {
   int current_num = num;
   int count = 1;
@@ -21,10 +29,7 @@ def bool checkPrime(int num) {
 
   while (count < current_num) {
     if (current_num % count == 0 && count != 1) {
-      print("This is a factor of ");
-      print(current_num);
-      print(": ");
-      println(count);
+      printFactor(count, current_num);
       count = count + 1;
       isPrime = false;
     } else {
