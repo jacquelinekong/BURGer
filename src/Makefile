@@ -18,7 +18,7 @@ burger.native :
 clean :
 	ocamlbuild -clean
 	rm -rf testall.log *.diff burger scanner.ml parser.ml parser.mli parser.output
-	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
+	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe *.err
 
 .PHONY : parser
 parser :

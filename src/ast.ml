@@ -75,6 +75,11 @@ let string_of_op = function
   | And -> "&&"
   | Or -> "||"
 
+let string_of_uop = function
+    Neg -> "-"
+  | Not -> "!"
+
+
 let rec string_of_expr = function
     IntLit(l) -> string_of_int l
   | BoolLit(true) -> "true"
