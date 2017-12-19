@@ -118,7 +118,7 @@ let check_program program =
     if List.mem "main" (List.map (fun fd -> fd.fname) functions)
       then raise (Failure ("function main may not be defined")) else ();
 
-    List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
+    List.iter (check_not_void (fun n -> "illegal null formal " ^ n ^
       " in " ^ func.fname)) func.formals;
 
     (* List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
@@ -185,12 +185,19 @@ let check_program program =
        | [] -> ()
       in check_block sl
         | VDecl _ -> ()
+        (* | VAssign ((typ, string), e) -> ignore (expr (Assign(string, e))) *)
         | Expr e -> ignore (expr e)
         | If(p, b1, b2) -> check_bool_expr p; check_stmt b1; check_stmt b2
         | While(p, s) -> check_bool_expr p; check_stmt s
 
   in
 
+  let checkReturnStmt func m =  function
+    Return e -> let t = (expr e) in if t = func.typ then () else
+     raise (Failure ("Return gives " ^ string_of_typ t ^ " expected " ^
+                     string_of_typ func.typ ^ " in " ^ string_of_expr e))
+    | _ -> raise (Failure ("Function must end with return statement"))
+  in
 
   (* let rec stmt = function
     Block sl -> let rec check_block = function

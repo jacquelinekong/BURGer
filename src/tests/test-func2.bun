@@ -1,6 +1,6 @@
-def void testPrint(int a, char c, string d){
+def null testPrint(int a, bool c, string d){
 	println(a);
 	println(c);
 	println(d);
-	}
-testPrint(4, "c", "hello");
+}
+testPrint(4, false, "hello");

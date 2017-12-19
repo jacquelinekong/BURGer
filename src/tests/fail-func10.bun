@@ -1,3 +1,5 @@
 def null check(){
-	void x;
+	null x;
 	}
+
+/*add to semant: check for null declarations*/

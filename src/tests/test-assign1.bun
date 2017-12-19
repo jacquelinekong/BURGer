@@ -2,4 +2,7 @@ int x;
 bool y;
 x = 2;
 y = true;
-print("fdsaf\n");
+print("x = ");
+println(x);
+print("y = ");
+println(y);

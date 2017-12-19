@@ -1,4 +1,5 @@
 def null check(){
 	return 4;
 	}
-	
+
+/*check for return type to match func decl return type*/

@@ -177,14 +177,7 @@ let functions =
 	  let e1' = expr builder e1
      and e2' = expr builder e2 in
   	  (match op with
-        A.Add     ->
-          (* let string_concat =
-            if (L.type_of e1' str_t || L.type_of e2' str_t) then
-              (if (L.type_of e1' str_t) then int_format_str e2 else int_format_str e1)
-          in
-              L.build_call sprintf_func [| string_concat; e1'; e2' |] "sprintf" builder
-else *)
-  L.build_add
+        A.Add     -> L.build_add
   	  | A.Sub     -> L.build_sub
   	  | A.Mult    -> L.build_mul
       | A.Div     -> L.build_sdiv
@@ -209,10 +202,11 @@ else *)
           A.StringLit test -> L.build_call print_func [| (expr builder s) |] "print" builder
         | A.Id test ->
           let ptr_32 = L.pointer_type i32_t
-          and ptr_str = L.pointer_type str_t in
+          and ptr_bool = L.pointer_type i1_t
+          in
           let test_type = L.type_of (lookup test) in
-          if (test_type = ptr_32) then
-            L.build_call printf_func [| int_format_str ; (expr builder s) |] "print" builder
+          if ((test_type = ptr_32) || (test_type = ptr_bool)) then
+            L.build_call printf_func [| int_format_str ; (expr builder s) |] "printf" builder
           else L.build_call print_func [| (expr builder s) |] "print" builder
         | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "printf" builder
       )
@@ -221,9 +215,10 @@ else *)
           A.StringLit test -> L.build_call println_func [| (expr builder s) |] "println" builder
         | A.Id test ->
           let ptr_32 = L.pointer_type i32_t
-          and ptr_str = L.pointer_type str_t in
+          and ptr_bool = L.pointer_type i1_t
+          in
           let test_type = L.type_of (lookup test) in
-          if (test_type = ptr_32) then
+          if ((test_type = ptr_32) || (test_type = ptr_bool)) then
             L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
           else L.build_call println_func [| (expr builder s) |] "println" builder
         | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
@@ -234,7 +229,6 @@ else *)
  let result = (match fdecl.A.typ with A.Null -> ""
                                           | _ -> f ^ "_result") in
     L.build_call fdef (Array.of_list actuals) result builder
-  (* | A.Access(s, expr) -> d *)
   in
 
   (* Invoke "f builder" if the current block doesn't already

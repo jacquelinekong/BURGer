@@ -10,10 +10,10 @@ LLI="lli"
 #LLI="/usr/local/opt/llvm/bin/lli"
 
 # Path to the LLVM compiler
-#LLC="llc"
+LLC="llc"
 
 # Path to the C compiler
-#CC="cc"
+CC="gcc"
 
 # Path to the microc compiler.  Usually "./microc.native"
 # Try "_build/microc.native" if ocamlbuild was unable to create a symbolic link.
@@ -92,10 +92,11 @@ Check() {
     generatedfiles=""
 
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
+    Run "$CC" "-c -Wall" "stdlib.c" &&
     Run "$BURGER" "<" $1 ">" "${basename}.ll" &&
-    Run "$LLI" "${basename}.ll" ">" "${basename}.out" &&
-#    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "printbig.o" &&
-#    Run "./${basename}.exe" > "${basename}.out" &&
+    Run "$LLC" "${basename}.ll"  ">" "${basename}.out" &&
+   Run "$CC" "-o" "${basename}" "${basename}.s" "stdlib.o" &&
+   Run "./${basename}" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 
     # Report the status and clean up the generated files

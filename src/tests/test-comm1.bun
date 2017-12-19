@@ -1,4 +1,6 @@
 def null test(){
 	/*commenting stuff*/
-	print("ya");
+	print("ya\n");
 	}
+
+	test();

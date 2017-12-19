@@ -1,24 +1,10 @@
-def string ret1(string s){
+def String ret1(String s){
 	return s;
 	}
 
-string t;
+String t;
 t = ret1("omg");
 println(t);
-
-def char ret2(char c){
-	return c;
-	}
-char ch;
-ch = ret2("h");
-println(ch);
-
-def double ret3(double d){
-	return d;
-	}
-double doub;
-doub = ret3(4.25);
-println(doub);
 
 def int ret4(int i){
 	return i;

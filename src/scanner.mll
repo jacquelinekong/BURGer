@@ -8,7 +8,7 @@
 
 let escape = '\\' ['\\' ''' '"' 'n' 'r' 't']
 let ascii = ([' '-'!' '#'-'[' ']'-'~'])
-let string = ('"'|''') ( (ascii | escape)* as s) ('"'|''')
+let string = ('"') ( (ascii | escape)* as s) ('"')
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf }
@@ -27,8 +27,8 @@ rule token = parse
   | '*'                { TIMES }
   | '/'                { DIVIDE }
   | '='                { ASSIGN }
-  | "<<"               { LT }
-  | ">>"               { GT }
+  | "<"               { LT }
+  | ">"               { GT }
   | "=="               { EQ }
   | "!="               { NEQ }
   | "<="               { LEQ }
@@ -44,7 +44,7 @@ rule token = parse
   | "false"            { FALSE }
   | "int"              { INT }
   | "char"             { CHAR }
-  | "String"           { STRING }
+  | "string"           { STRING }
   | "bool"             { BOOL }
   | "null"             { NULL }
   | "return"           { RETURN }

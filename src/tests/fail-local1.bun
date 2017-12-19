@@ -4,3 +4,4 @@ def int check(int a){
 	return a;
 	}
 
+/*why can't we check for duplicate locals in a function again?*/
