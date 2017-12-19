@@ -207,7 +207,13 @@ else *)
   | A.Call ("print", [s]) ->
     let test = s in (match s with
           A.StringLit test -> L.build_call print_func [| (expr builder s) |] "print" builder
-        (* | A.Id test -> L.build_call print_func [| (expr builder s) |] "print" builder *)
+        | A.Id test ->
+          let ptr_32 = L.pointer_type i32_t
+          and ptr_str = L.pointer_type str_t in
+          let test_type = L.type_of (lookup test) in
+          if (test_type = ptr_32) then
+            L.build_call printf_func [| int_format_str ; (expr builder s) |] "print" builder
+          else L.build_call print_func [| (expr builder s) |] "print" builder
         | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "printf" builder
       )
   | A.Call("println", [s]) ->
@@ -220,37 +226,8 @@ else *)
           if (test_type = ptr_32) then
             L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
           else L.build_call println_func [| (expr builder s) |] "println" builder
-          (* print_string (L.string_of_lltype test_type); (lookup test) *)
-            (* (L.string_of_lltype test_type) *)
-          (* (match test_type with
-            ptr_32 -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
-          | ptr_str -> L.build_call println_func [| (expr builder s) |] "println" builder
-          ) *)
-            (* (match test_type with
-                ptr_str -> L.build_call println_func [| (L.build_global_stringptr test "str" builder) |] "println" builder
-             | ptr_32 -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
-            ) *)
         | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
       )
-  (* | A.Call("sprintf", [s]) ->
-    let buffer = s in (match s with
-          A.IntLit buffer -> L.build_call sprintf_func [| int_format_str ; (expr builder s)|] "sprintf" builder
-        | A.StringLit buffer -> L.build_call sprintf_func [| (expr builder s) |] "sprintf" builder
-      ) *)
-
-  (* let int_format_str builder = L.build_global_stringptr "%d\n" "fmt" llbuilder;
-     and str_format_str builder = L.build_global_stringptr "%s\n" "fmt" llbuilder in
-
-     let format_str s_typ builder = match s_typ with
-      A.Int -> int_format_str builder
-     | A.String -> str_format_str builder
-     | _ -> raise (Failure "Invalid printf type")
-     in
-
-     let e' = expr builder e
-     and e_type =
-     L.build_call printf_func [| format_str e_type llbuilder; e' |]
-     "printf" builder *)
   | A.Call (f, act) ->
     let (fdef, fdecl) = StringMap.find f function_decls in
  let actuals = List.rev (List.map (expr builder) (List.rev act)) in
