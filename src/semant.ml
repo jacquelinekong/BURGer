@@ -33,9 +33,11 @@ let check_program program =
   let globals =
     let global_list = List.filter (fun x -> match x with
         Ast.VDecl(x) -> true
+      | Ast.VAssign(x, _) -> true
       | _ -> false) stmt_list
     in List.map (fun x -> match x with
         Ast.VDecl(x) -> x
+      | Ast.VAssign(x, _) -> x
       | _ -> failwith "not turned into global") global_list
   in
 
@@ -185,7 +187,7 @@ let check_program program =
        | [] -> ()
       in check_block sl
         | VDecl _ -> ()
-        (* | VAssign ((typ, string), e) -> ignore (expr (Assign(string, e))) *)
+        | VAssign ((typ, string), e) -> ignore (expr (Assign(string, e)))
         | Expr e -> ignore (expr e)
         | If(p, b1, b2) -> check_bool_expr p; check_stmt b1; check_stmt b2
         | While(p, s) -> check_bool_expr p; check_stmt s
