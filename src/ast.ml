@@ -23,7 +23,6 @@ type expr =
   | Assign of string * expr
   | Binop of expr * op * expr
   | Unop of uop * expr
-  | Access of string * expr
   | NoExpr
 
 type typ = Int | Bool | Char | String | Null | Array of typ * expr
@@ -75,6 +74,11 @@ let string_of_op = function
   | Geq -> ">="
   | And -> "&&"
   | Or -> "||"
+
+let string_of_uop = function
+    Neg -> "-"
+  | Not -> "!"
+
 
 let rec string_of_expr = function
     IntLit(l) -> string_of_int l

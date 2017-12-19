@@ -1,3 +1,0 @@
-def int check(int a, int a){
-	return a;
-	}
