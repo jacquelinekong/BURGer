@@ -62,7 +62,7 @@ typ:
 
 stmt:
     expr SEMI                               { Expr($1) }
-  | vdecl SEMI                              { VDecl($1) }
+  | vdecl SEMI                              { $1 }
   | RETURN expr SEMI                        { Return($2) }
   | RETURN SEMI                             { Return(NoExpr) }
   | LBRACE stmt_list RBRACE                 { Block(List.rev $2) }
@@ -110,8 +110,8 @@ expr:
 /*** Variable Declarations ***/
 
 vdecl:
-  typ ID { ($1, $2) }
- /*| typ assign_expr { $1, $2 }*/
+   typ ID             { VDecl($1, $2) }
+ | typ ID ASSIGN expr { VAssign(($1, $2), $4) }
 
 /*** Function Declarations ***/
 
