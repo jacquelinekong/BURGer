@@ -213,7 +213,23 @@ else *)
   | A.Call("println", [s]) ->
     let test = s in (match s with
           A.StringLit test -> L.build_call println_func [| (expr builder s) |] "println" builder
-        (* | A.Id test -> L.build_call println_func [| (expr builder s) |] "println" builder *)
+        | A.Id test ->
+          let ptr_32 = L.pointer_type i32_t
+          and ptr_str = L.pointer_type str_t in
+          let test_type = L.type_of (lookup test) in
+          if (test_type = ptr_32) then
+            L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
+          else L.build_call println_func [| (expr builder s) |] "println" builder
+          (* print_string (L.string_of_lltype test_type); (lookup test) *)
+            (* (L.string_of_lltype test_type) *)
+          (* (match test_type with
+            ptr_32 -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
+          | ptr_str -> L.build_call println_func [| (expr builder s) |] "println" builder
+          ) *)
+            (* (match test_type with
+                ptr_str -> L.build_call println_func [| (L.build_global_stringptr test "str" builder) |] "println" builder
+             | ptr_32 -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
+            ) *)
         | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
       )
   (* | A.Call("sprintf", [s]) ->
