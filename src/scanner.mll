@@ -19,16 +19,14 @@ rule token = parse
   | string             { STRINGLIT(s) }
   | '{'                { LBRACE }
   | '}'                { RBRACE }
-  | '['                { LBRACK }
-  | ']'                { RBRACK }
   | ','                { COMMA }
   | '+'                { PLUS }
   | '-'                { MINUS }
   | '*'                { TIMES }
   | '/'                { DIVIDE }
   | '='                { ASSIGN }
-  | "<"               { LT }
-  | ">"               { GT }
+  | "<"                { LT }
+  | ">"                { GT }
   | "=="               { EQ }
   | "!="               { NEQ }
   | "<="               { LEQ }
@@ -38,7 +36,6 @@ rule token = parse
   | "!"                { NOT }
   | "if"               { IF }
   | "else"             { ELSE }
-  | "for"              { FOR }
   | "while"            { WHILE }
   | "true"             { TRUE }
   | "false"            { FALSE }

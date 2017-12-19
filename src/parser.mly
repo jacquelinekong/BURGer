@@ -12,14 +12,14 @@
 %token <string> STRINGLIT
 %token <int> INTLIT
 
-%token LPAREN RPAREN SEMI LBRACE RBRACE LBRACK RBRACK COMMA
-%token PLUS MINUS TIMES DIVIDE ASSIGN NEG
+%token LPAREN RPAREN SEMI LBRACE RBRACE COMMA
+%token PLUS MINUS TIMES DIVIDE ASSIGN
 %token LT GT LEQ GEQ EQ NEQ
 %token AND OR NOT
 %token IF ELSE NOELSE
 %token TRUE FALSE
 %token INT CHAR STRING BOOL NULL
-%token FOR WHILE DEF RETURN
+%token WHILE DEF RETURN
 %token EOF
 
 %nonassoc NOELSE
@@ -31,7 +31,7 @@
 %left LT GT LEQ GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
-%right NOT NEG
+%right NOT
 
 %start program
 %type <Ast.program> program
