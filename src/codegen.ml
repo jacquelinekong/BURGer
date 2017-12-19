@@ -74,18 +74,26 @@ let functions =
           A.Function(x) -> true
         | _ -> false) program
       in
-        let all_functions_as_items = fdecl_main :: functions_as_items
-        in List.map (fun x -> match x with
-            A.Function(x) -> x
-          | _ -> failwith "function casting didn't work") all_functions_as_items
+    let all_functions_as_items = fdecl_main :: functions_as_items
+    in List.map (fun x -> match x with
+        A.Function(x) -> x
+      | _ -> failwith "function casting didn't work") all_functions_as_items
   in
 
   (*store the global variables in a string map*)
   let global_vars =
-  let global_var map (t, n) =
-    let init = L.const_int (ltype_of_typ t) 0
-    in StringMap.add n (L.define_global n init the_module) map in
-  List.fold_left global_var StringMap.empty globals in
+    let global_var map (t, n) =
+      if (ltype_of_typ t = str_t)
+      then (
+        let init = L.const_null str_t in
+        StringMap.add n (L.define_global n init the_module) map
+      )
+      else (
+        let init = L.const_int (ltype_of_typ t) 0
+        in StringMap.add n (L.define_global n init the_module) map
+      )
+    in
+    List.fold_left global_var StringMap.empty globals in
 
   (* printf() declaration *)
   let print_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
@@ -119,7 +127,6 @@ let functions =
 
     let int_format_str_ln = L.build_global_stringptr "%d\n" "fmt" builder in
     let int_format_str = L.build_global_stringptr "%d" "fmt" builder in
-
 
     let local_vars =
       let add_formal var_map (formal_type, formal_name) param = L.set_value_name formal_name param;
@@ -156,12 +163,12 @@ let functions =
                    with Not_found -> StringMap.find n global_vars
   in
 
-  let is_string s =
+  (* let is_string s =
     if L.type_of s = str_t then s else (L.const_inttoptr s str_t)
-  in
+  in *)
 
   let rec expr builder = function
-    A.StringLit e -> L.build_global_stringptr e "str" builder
+    A.StringLit s -> L.build_global_stringptr s "str" builder
   | A.IntLit i -> L.const_int i32_t i
   | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
   | A.NoExpr -> L.const_int i32_t 0
@@ -199,13 +206,15 @@ else *)
     ignore (L.build_store e' (lookup s) builder); e'
   | A.Call ("print", [s]) ->
     let test = s in (match s with
-         A.StringLit test -> L.build_call print_func [| (expr builder s) |] "print" builder
+          A.StringLit test -> L.build_call print_func [| (expr builder s) |] "print" builder
+        (* | A.Id test -> L.build_call print_func [| (expr builder s) |] "print" builder *)
         | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "printf" builder
       )
   | A.Call("println", [s]) ->
     let test = s in (match s with
           A.StringLit test -> L.build_call println_func [| (expr builder s) |] "println" builder
-        | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "printf" builder
+        (* | A.Id test -> L.build_call println_func [| (expr builder s) |] "println" builder *)
+        | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
       )
   (* | A.Call("sprintf", [s]) ->
     let buffer = s in (match s with
@@ -231,7 +240,8 @@ else *)
  let actuals = List.rev (List.map (expr builder) (List.rev act)) in
  let result = (match fdecl.A.typ with A.Null -> ""
                                           | _ -> f ^ "_result") in
-       L.build_call fdef (Array.of_list actuals) result builder
+    L.build_call fdef (Array.of_list actuals) result builder
+  (* | A.Access(s, expr) -> d *)
   in
 
   (* Invoke "f builder" if the current block doesn't already
