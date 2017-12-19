@@ -1,0 +1,3 @@
+def null check(){
+	void x;
+	}

@@ -82,20 +82,14 @@ let check_program program =
     | _ -> ()
   in
 
-  let built_in_decls =  StringMap.add "println"
-      { typ = Null; fname = "println"; formals = [(String, "x")]; body = [] }
-      ( StringMap.singleton "print"
-       { typ = Null; fname = "print"; formals = [(String, "x")]; body = [] })
-
+  let built_in_decls = StringMap.singleton "print"
+    { typ = Null; fname = "print"; formals = [(String, "x")];
+     body = [] }
   in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
-                         built_in_decls functions
-     in
-
-  (* let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
-                         StringMap.empty functions
-  in *)
+    built_in_decls functions
+  in
 
   let function_decl s = try StringMap.find s function_decls
        with Not_found -> raise (Failure ("unrecognized function " ^ s))
@@ -103,8 +97,7 @@ let check_program program =
 
   let check_function func =
 
-    List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
-      " in " ^ func.fname)) func.formals;
+
 
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
       (List.map snd func.formals);
@@ -115,16 +108,17 @@ let check_program program =
     if List.mem "println" (List.map (fun fd -> fd.fname) functions)
       then raise (Failure ("function println may not be defined")) else ();
 
-      if List.mem "printf" (List.map (fun fd -> fd.fname) functions)
-        then raise (Failure ("function printf may not be defined")) else ();
+    if List.mem "printf" (List.map (fun fd -> fd.fname) functions)
+      then raise (Failure ("function printf may not be defined")) else ();
 
     report_duplicate (fun n -> "duplicate function " ^ n)
       (List.map (fun fd -> fd.fname) functions);
 
-      if List.mem "main" (List.map (fun fd -> fd.fname) functions)
-        then raise (Failure ("function main may not be defined")) else ();
+    if List.mem "main" (List.map (fun fd -> fd.fname) functions)
+      then raise (Failure ("function main may not be defined")) else ();
 
-
+    List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
+      " in " ^ func.fname)) func.formals;
 
     (* List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
       " in " ^ func.fname)) func.locals; *)
@@ -140,18 +134,19 @@ let check_program program =
     | Id s -> type_of_identifier s
     | Assign(var, e) as ex -> let lt = type_of_identifier var
                               and rt = expr e in
-      check_assign lt rt (Failure ("Illegal assignment: " ^ string_of_typ lt ^
-           " = " ^ string_of_typ rt ^ " in " ^ string_of_expr ex))
-    | Binop(l, op, r) as e -> let t1 = expr l and t2 = expr r in
-      (match op with
-              Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
-      | Equal | Neq when t1 = t2 -> Bool
-      | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
-      | And | Or when t1 = Bool && t2 = Bool -> Bool
-            | _ -> raise (Failure ("illegal binary operator " ^
-                  string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-                  string_of_typ t2 ^ " in " ^ string_of_expr e))
-            )
+      check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
+           " = " ^ string_of_typ rt ^ " in " ^
+           string_of_expr ex))
+    | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
+    (match op with
+        Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+        | Equal | Neq when t1 = t2 -> Bool
+        | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
+        | And | Or when t1 = Bool && t2 = Bool -> Bool
+        | _ -> raise (Failure ("illegal binary operator " ^
+            string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+            string_of_typ t2 ^ " in " ^ string_of_expr e))
+      )
     | Call(fname, actuals) as call -> let fd = function_decl fname in
        if List.length actuals != List.length fd.formals then
          raise (Failure ("expecting " ^ string_of_int
@@ -163,13 +158,54 @@ let check_program program =
               " ; expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
            fd.formals actuals;
          fd.typ
+    | Unop(op, e) as ex -> let t = expr e in
+      (match op with
+ 	      Neg when t = Int -> Int
+ 	    | Not when t = Bool -> Bool
+      | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
+ 	  		   string_of_typ t ^ " in " ^ string_of_expr ex)))
+      | NoExpr -> Null
   in
 
-  let check_stmt s = match s with
-      VDecl _ -> ()
+  let check_bool_expr e = if expr e != Bool
+   then raise (Failure ("expected Boolean expression in " ^ string_of_expr e))
+   else () in
+
+    let rec check_stmt s = match s with
+      Block sl -> let rec check_block = function
+         [Return _ as x] -> check_stmt x
+       | Return _ :: _ -> raise (Failure "nothing may follow a return")
+       | Block sl :: ss -> check_block (sl @ ss)
+       | x :: ss -> check_stmt x ; check_block ss
+       | [] -> ()
+      in check_block sl
+        | VDecl _ -> ()
+        | Expr e -> ignore (expr e)
+        | If(p, b1, b2) -> check_bool_expr p; check_stmt b1; check_stmt b2
+        | While(p, s) -> check_bool_expr p; check_stmt s
+
+  in
+
+
+  (* let rec stmt = function
+    Block sl -> let rec check_block = function
+         [Return _ as s] -> stmt s
+       | Return _ :: _ -> raise (Failure "nothing may follow a return")
+       | Block sl :: ss -> check_block (sl @ ss)
+       | s :: ss -> stmt s ; check_block ss
+       | [] -> ()
+      in check_block sl
     | Expr e -> ignore (expr e)
+     (* | Return e -> let t = expr e in if t = func.typ then () else
+       raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
+                       string_of_typ func.typ ^ " in " ^ string_of_expr e))  *)
 
-  in
+    | If(p, b1, b2) -> check_bool_expr p; stmt b1; stmt b2
+    | For(e1, e2, e3, st) -> ignore (expr e1); check_bool_expr e2;
+                             ignore (expr e3); stmt st
+    | While(p, s) -> check_bool_expr p; stmt s
+  in *)
+
 
 
 
@@ -177,6 +213,7 @@ let check_program program =
   (* Check for assignments and duplicate vdecls *)
   List.iter check_function functions;
   List.iter check_stmt stmt_list;
+  (* List.iter stmt stmt_list; *)
   report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals);
 
 
