@@ -192,12 +192,12 @@ let check_program program =
 
   in
 
-  let checkReturnStmt func m =  function
+  (* let checkReturnStmt func m =  function
     Return e -> let t = (expr e) in if t = func.typ then () else
      raise (Failure ("Return gives " ^ string_of_typ t ^ " expected " ^
                      string_of_typ func.typ ^ " in " ^ string_of_expr e))
     | _ -> raise (Failure ("Function must end with return statement"))
-  in
+  in *)
 
   (* let rec stmt = function
     Block sl -> let rec check_block = function

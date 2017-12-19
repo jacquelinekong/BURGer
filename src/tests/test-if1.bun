@@ -1,4 +1,0 @@
-def null ok(){
-	print("hi");
-}
-ok();

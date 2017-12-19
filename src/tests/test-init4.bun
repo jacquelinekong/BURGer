@@ -1,2 +1,2 @@
-String s;
+string s;
 print(s);

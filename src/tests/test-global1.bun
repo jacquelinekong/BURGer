@@ -3,13 +3,14 @@ int b;
 a = 2;
 b = 4;
 
-void inc(int a, int b){
+def int inc(int a){
 	a = a + 1;
-	b = b + 1;
-	}
+	return a;
+}
 
-print(a);
-print(b);
-inc();
-print(a);
-print(b);
+println(a);
+println(b);
+a = inc(a);
+b = inc(b);
+println(a);
+println(b);

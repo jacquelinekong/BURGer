@@ -4,7 +4,7 @@ if(true){
 	println("fff");
 	}
 
-if(1<<3){
+if(1<3){
 	println("YES");
 	println("HI");
 	}

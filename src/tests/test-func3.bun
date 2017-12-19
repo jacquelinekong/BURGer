@@ -9,10 +9,10 @@ def null add(int a, int b){
 	r = a*b;
 	println(r);
 
-	if(a>>b){
+	if(a>b){
 		println("works");
 	}
-	if(a<<b){
+	if(a<b){
 		println("wrong");
 	}
 	if(a>=b){

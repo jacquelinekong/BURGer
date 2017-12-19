@@ -1,11 +1,19 @@
 if(false){
 	print("no");
 	}
-elseif(true){
+else if(true){
 	print("yes");
 	}
-else{
-	print("why");
-	}
+else {
+	println("why");
+}
 
-	
+if(false){
+	print("no");
+	}
+else if(false){
+	print("yes");
+	}
+else {
+	println("why");
+}

@@ -190,11 +190,12 @@ let functions =
   	  | A.Greater -> L.build_icmp L.Icmp.Sgt
   	  | A.Geq     -> L.build_icmp L.Icmp.Sge
   	  ) e1' e2' "tmp" builder
-  (* | A.Unop(op, e) ->
+  | A.Unop(op, e) ->
 	  let e' = expr builder e in
   	  (match op with
   	    A.Neg     -> L.build_neg
-      | A.Not     -> L.build_not) e' "tmp" builder *)
+       | A.Not     -> L.build_not)
+       e' "tmp" builder
   | A.Assign (s, e) -> let e' = expr builder e in
     ignore (L.build_store e' (lookup s) builder); e'
   | A.Call ("print", [s]) ->
@@ -276,7 +277,7 @@ let functions =
       ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
       L.builder_at_end context merge_bb
 
-      | A.For (e1, e2, e3, body) -> stmt builder ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
+      (* | A.For (e1, e2, e3, body) -> stmt builder ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] ) *)
   in
 
    (* Build the code for each statement in the function *)

@@ -1,6 +1,8 @@
-def math(int a, int b, int c){
+def int math(int a, int b, int c){
 	int r = a*(b+c);
+	return r;
 	}
-int x = math(3, 2, 4);
+/*int x = math(3, 2, 4);*/
+int x;
+x = math(3,2,4);
 print(x);
-

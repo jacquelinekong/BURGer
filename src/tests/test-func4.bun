@@ -1,14 +1,14 @@
-def String ret1(String s){
+def string ret1(string s){
 	return s;
-	}
+}
 
-String t;
+string t;
 t = ret1("omg");
 println(t);
 
 def int ret4(int i){
 	return i;
-	}
+}
 int a;
 a = ret4(5);
 println(a);

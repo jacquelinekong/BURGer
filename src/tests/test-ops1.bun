@@ -1,6 +1,4 @@
 print(1+2);
 print(2-1);
 print(3/1);
-print(2*2);
-print(4%2);
-
+println(2*2);
