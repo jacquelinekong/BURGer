@@ -1,7 +1,7 @@
 int i;
 i = 0;
 while(i<5){
-	println("pls");
-	println("help");
+	println("yum");
+	println("burgers");
 	i = i+1;
 }

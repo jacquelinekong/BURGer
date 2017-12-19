@@ -1,0 +1,55 @@
+def int countFactors(int num) {
+  int current_num = num;
+  int count = 1;
+  int number_of_factors = 1;
+
+  while (count <= current_num) {
+    if (current_num % count == 0 && count != 1) {
+      count = count + 1;
+      number_of_factors = number_of_factors + 1;
+    } else {
+        count = count + 1;
+    }
+  }
+  return number_of_factors;
+}
+
+def bool checkPrime(int num) {
+  int current_num = num;
+  int count = 1;
+  bool isPrime = true;
+
+  while (count < current_num) {
+    if (current_num % count == 0 && count != 1) {
+      print("This is a factor of ");
+      print(current_num);
+      print(": ");
+      println(count);
+      count = count + 1;
+      isPrime = false;
+    } else {
+        count = count + 1;
+    }
+    if (count == current_num) {
+      return isPrime;
+    }
+  }
+  return isPrime;
+}
+
+def null printResults(bool check, int num) {
+  if (check == false) {
+    print("CONCLUSION: ");
+    print(num);
+    print(" has ");
+    print(countFactors(num));
+    println(" factors including itself and 1. It is not a prime number!");
+  } else {
+    print("CONCLUSION: ");
+    print(num);
+    println(" is a prime number!");
+  }
+}
+
+printResults(checkPrime(169), 169);
+printResults(checkPrime(120), 120);
