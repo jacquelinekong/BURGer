@@ -23,7 +23,6 @@ type expr =
   | Assign of string * expr
   | Binop of expr * op * expr
   | Unop of uop * expr
-  | Access of string * expr
   | NoExpr
 
 type typ = Int | Bool | Char | String | Null | Array of typ * expr
