@@ -74,18 +74,22 @@ let functions =
           A.Function(x) -> true
         | _ -> false) program
       in
-        let all_functions_as_items = fdecl_main :: functions_as_items
-        in List.map (fun x -> match x with
-            A.Function(x) -> x
-          | _ -> failwith "function casting didn't work") all_functions_as_items
+    let all_functions_as_items = fdecl_main :: functions_as_items
+    in List.map (fun x -> match x with
+        A.Function(x) -> x
+      | _ -> failwith "function casting didn't work") all_functions_as_items
   in
 
   (*store the global variables in a string map*)
   let global_vars =
     let global_var map (t, n) =
       if (ltype_of_typ t = str_t)
-      then
-          StringMap.add n (L.declare_global str_t n the_module) map
+      then (
+        (* let wrapper =
+          let string_global = L.declare_global str_t n the_module in
+              List.cons string_global empty_string_globals_list in *)
+            StringMap.add n (L.declare_global str_t n the_module) map
+      )
       else (
         let init = L.const_int (ltype_of_typ t) 0
         in StringMap.add n (L.define_global n init the_module) map
@@ -94,9 +98,13 @@ let functions =
     List.fold_left global_var StringMap.empty globals in
 
   let set_string_init_value =
-     let string_init_value = L.const_pointer_null str_t
+     let string_init_value = L.const_null str_t
       in
-      let actually_set_value gv = L.set_initializer string_init_value gv
+      let actually_set_value gv = (*L.set_initializer string_init_value gv*)
+        let global_var_type = L.type_of gv
+        in (match global_var_type with
+              str_t -> L.set_initializer string_init_value gv
+            | _ -> ())
       in
       StringMap.map actually_set_value global_vars
   in
@@ -213,14 +221,14 @@ else *)
   | A.Call ("print", [s]) ->
     let test = s in (match s with
           A.StringLit test -> L.build_call print_func [| (expr builder s) |] "print" builder
-        (* | A.Id test -> L.build_call print_func [| (expr builder s) |] "print" builder *)
+        | A.Id test -> L.build_call print_func [| (expr builder s) |] "print" builder
         | _ -> L.build_call printf_func [| int_format_str ; (expr builder s) |] "printf" builder
       )
   | A.Call("println", [s]) ->
     let test = s in (match s with
           A.StringLit test -> L.build_call println_func [| (expr builder s) |] "println" builder
-        | A.Id test -> L.build_call println_func [| (expr builder s) |] "println" builder
-        | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "printf" builder
+        (* | A.Id test -> L.build_call println_func [| (expr builder s) |] "println" builder *)
+        | _ -> L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
       )
   (* | A.Call("sprintf", [s]) ->
     let buffer = s in (match s with
