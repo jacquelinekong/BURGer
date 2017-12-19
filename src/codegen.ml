@@ -82,10 +82,15 @@ let functions =
 
   (*store the global variables in a string map*)
   let global_vars =
-  let global_var map (t, n) =
-    let init = L.const_int (ltype_of_typ t) 0
-    in StringMap.add n (L.define_global n init the_module) map in
-  List.fold_left global_var StringMap.empty globals in
+    let global_var map (t, n) =
+      if (ltype_of_typ t = str_t)
+      then StringMap.add n (L.declare_global str_t n the_module) map
+      else (
+        let init = L.const_int (ltype_of_typ t) 0
+        in StringMap.add n (L.define_global n init the_module) map
+      )
+    in
+    List.fold_left global_var StringMap.empty globals in
 
   (* printf() declaration *)
   let print_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
@@ -231,7 +236,8 @@ else *)
  let actuals = List.rev (List.map (expr builder) (List.rev act)) in
  let result = (match fdecl.A.typ with A.Null -> ""
                                           | _ -> f ^ "_result") in
-       L.build_call fdef (Array.of_list actuals) result builder
+    L.build_call fdef (Array.of_list actuals) result builder
+  (* | A.Access(s, expr) -> d *)
   in
 
   (* Invoke "f builder" if the current block doesn't already
