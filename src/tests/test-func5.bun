@@ -4,3 +4,4 @@ def int check(int a){
 }
 
 	print(check(5));
+	println(16%2);

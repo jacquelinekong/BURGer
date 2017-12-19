@@ -10,4 +10,4 @@ println(fib(2));
 println(fib(3));
 println(fib(4));
 println(fib(5));
-println("Fibonacci test over!\n");
+println("Fibonacci test over!");

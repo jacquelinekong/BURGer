@@ -1,5 +1,0 @@
-def null check(){
-	null x;
-	}
-
-/*add to semant: check for null declarations*/

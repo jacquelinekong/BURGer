@@ -13,7 +13,7 @@
 %token <int> INTLIT
 
 %token LPAREN RPAREN SEMI LBRACE RBRACE LBRACK RBRACK COMMA
-%token PLUS MINUS TIMES DIVIDE ASSIGN NEG
+%token PLUS MINUS TIMES DIVIDE MOD ASSIGN NEG
 %token LT GT LEQ GEQ EQ NEQ
 %token AND OR NOT
 %token IF ELSE NOELSE
@@ -30,7 +30,7 @@
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
-%left TIMES DIVIDE
+%left TIMES DIVIDE MOD
 %right NOT NEG
 
 %start program
@@ -77,13 +77,14 @@ stmt_list:
 /*** Expressions ***/
 
 expr:
-    MINUS expr                      { Unop(Neg, $2) }
+    MINUS expr                     { Unop(Neg, $2) }
   | NOT expr                      { Unop(Not, $2) }
   | ID ASSIGN expr                { Assign($1, $3) }
   | expr PLUS   expr              { Binop($1, Add,   $3) }
   | expr MINUS  expr              { Binop($1, Sub,   $3) }
   | expr TIMES  expr              { Binop($1, Mult,  $3) }
   | expr DIVIDE expr              { Binop($1, Div,   $3) }
+  | expr MOD expr                 { Binop($1, Mod,   $3) }
   | expr EQ     expr              { Binop($1, Equal, $3) }
   | expr NEQ    expr              { Binop($1, Neq,   $3) }
   | expr LT     expr              { Binop($1, Less,  $3) }

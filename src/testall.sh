@@ -94,7 +94,7 @@ Check() {
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
     Run "$CC" "-c -Wall" "stdlib.c" &&
     Run "$BURGER" "<" $1 ">" "${basename}.ll" &&
-    Run "$LLC" "${basename}.ll"  ">" "${basename}.out" &&
+    Run "$LLC" "${basename}.ll" &&
    Run "$CC" "-o" "${basename}" "${basename}.s" "stdlib.o" &&
    Run "./${basename}" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff

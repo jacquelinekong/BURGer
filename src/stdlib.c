@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+
 // Prints with \n escape character
 void print(char *s){
   char c;

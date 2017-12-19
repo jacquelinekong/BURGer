@@ -1,7 +1,0 @@
-def int check(int a){
-	int b;
-	int b;
-	return a;
-	}
-
-/*why can't we check for duplicate locals in a function again?*/

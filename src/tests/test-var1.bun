@@ -1,3 +1,2 @@
-int a;
-x = 4;
-print(a);
+string bucket = "water";
+println(bucket);
