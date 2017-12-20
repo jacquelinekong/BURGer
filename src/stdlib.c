@@ -1,9 +1,14 @@
+/* Standard Library for BURGer Programming Language
+PLT Fall 2017
+Includes 2 print functions (print and println)
+Author: Adrian Traviezo */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 
-// Prints with \n escape character
+// Prints given string and accepts escape characters
 void print(char *s){
   char c;
   int i = 0;

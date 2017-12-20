@@ -1,4 +1,12 @@
-(* Semantic checking for the MicroC compiler *)
+(* Semantic Checker for the BURGer Programming Language
+   PLT Fall 2017
+   Authors:
+   Adrian Traviezo
+   Jacqueline Kong
+   Ashley Nguyen
+   Jordan Lee
+*)
+
 open Ast
 
 module StringMap = Map.Make(String)
@@ -18,6 +26,7 @@ let check_program program =
     in helper (List.sort compare list)
   in
 
+  (* figure out which items are statements and make a list of statements *)
   let stmt_list =
     let stmts_as_items =
       List.filter (fun x -> match x with
@@ -28,8 +37,9 @@ let check_program program =
         | _ -> failwith "stmt casting didn't work") stmts_as_items
   in
 
-  (*after you figure out which items are statements, you need to go through the statements
-    and figure out which ones contain the variables*)
+  (* after you figure out which items are statements, you need to go through the statements
+     and figure out which ones contain the variable declarations and
+     variable decl+assignment statements *)
   let globals =
     let global_list = List.filter (fun x -> match x with
         Ast.VDecl(x) -> true
@@ -51,7 +61,6 @@ let check_program program =
             Ast.Function(x) -> x
           | _ -> failwith "function casting didn't work") all_functions_as_items
   in
-
 
   (* let function_locals =
     let get_locals_from_fbody fdecl =
@@ -100,8 +109,6 @@ let check_program program =
   in
 
   let check_function func =
-
-
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
       (List.map snd func.formals);
 
@@ -179,7 +186,7 @@ let check_program program =
    else () in
 
     let rec check_stmt s = match s with
-      Block sl -> let rec check_block = function
+        Block sl -> let rec check_block = function
          [Return _ as x] -> check_stmt x
        | Return _ :: _ -> raise (Failure "nothing may follow a return")
        | Block sl :: ss -> check_block (sl @ ss)
@@ -198,4 +205,4 @@ let check_program program =
   List.iter check_function functions;
   List.iter check_stmt stmt_list;
   (* List.iter stmt stmt_list; *)
-  report_duplicate (fun n -> "Duplicate assignment for " ^ n) (List.map snd globals);
+  report_duplicate (fun n -> "Duplicate declaration or assignment for " ^ n) (List.map snd globals);

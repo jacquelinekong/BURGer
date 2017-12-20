@@ -6,5 +6,4 @@ if(true){
 		if(false){
 			print("what");
 		}
-
 }

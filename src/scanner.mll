@@ -3,8 +3,8 @@
 * Jordan Lee
 * Jacqueline Kong
 *)
-{ open Parser
-}
+
+{ open Parser }
 
 let escape = '\\' ['\\' ''' '"' 'n' 'r' 't']
 let ascii = ([' '-'!' '#'-'[' ']'-'~'])
@@ -24,7 +24,7 @@ rule token = parse
   | '-'                { MINUS }
   | '*'                { TIMES }
   | '/'                { DIVIDE }
-  | '%'                 { MOD }
+  | '%'                { MOD }
   | '='                { ASSIGN }
   | "<"                { LT }
   | ">"                { GT }
@@ -41,7 +41,6 @@ rule token = parse
   | "true"             { TRUE }
   | "false"            { FALSE }
   | "int"              { INT }
-  | "char"             { CHAR }
   | "string"           { STRING }
   | "bool"             { BOOL }
   | "null"             { NULL }

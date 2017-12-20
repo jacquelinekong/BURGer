@@ -1,9 +1,9 @@
 (*
- * Code generation for BURGer programming Language
+ * Code generation for BURGer Programming Language
  * Authors:
+ * Jordan Lee
  * Jacqueline Kong
  * Adrian Traviezo
- * Jordan Lee
  * Ashley Nguyen
  *)
 
@@ -21,14 +21,15 @@ let translate (program) =
     and i1_t   = L.i1_type context
     and i32_t  = L.i32_type context in
 
+  (* types of variables in BURGer*)
   let ltype_of_typ = function
-      A.Char -> i8_t
-    | A.String -> str_t
+      A.String -> str_t
     | A.Null -> null_t
     | A.Int -> i32_t
     | A.Bool -> i1_t
   in
 
+  (* isolate list of items that match as statements and then form a list of statements *)
   let stmt_list =
     let stmts_as_items =
       List.filter (fun x -> match x with
@@ -40,7 +41,7 @@ let translate (program) =
   in
 
   (*after you figure out which items are statements, you need to go through the statements
-    and figure out which ones contain the variables*)
+    and figure out which ones contain the variable declarations *)
   let globals =
     let global_list = List.filter (fun x -> match x with
         A.VDecl(x) -> true
@@ -52,17 +53,15 @@ let translate (program) =
       | _ -> failwith "not turned into global") global_list
   in
 
-  (* let not_globals = *)
-      let not_globals_list = List.filter (fun x -> match x with
-        A.VDecl(x) -> false
-      (* | A.VAssign(x) -> false *)
-      | _ -> true) stmt_list in
-      (* in List.map (fun x -> match x with
-            A.VAssign((typ, string), expr) -> A.Stmt(string, expr)
-        ) not_globals_list *)
-  (* in *)
+  (* isolate list of statements that are NOT variable declarations *)
+  let not_globals_list = List.filter (fun x -> match x with
+    A.VDecl(x) -> false
+  | _ -> true) stmt_list in
 
-let functions =
+  (* from list of items in program, form list of functions from items and
+  build the main function *)
+  let functions =
+    (* generating the hidden main function *)
     let fdecl_main = A.Function({
            typ = A.Int;
            fname = "main";
@@ -70,6 +69,7 @@ let functions =
            body = List.rev(A.Return(A.IntLit(0)) :: List.rev(not_globals_list))
          })
     in
+    (* filtering out items that match as functions *)
       let functions_as_items = List.filter (fun x -> match x with
           A.Function(x) -> true
         | _ -> false) program
@@ -80,7 +80,7 @@ let functions =
       | _ -> failwith "function casting didn't work") all_functions_as_items
   in
 
-  (*store the global variables in a string map*)
+  (* Store the global variables in a string map *)
   let global_vars =
     let global_var map (t, n) =
       if (ltype_of_typ t = str_t)
@@ -104,9 +104,6 @@ let functions =
 
   let println_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let println_func = L.declare_function "println" println_t the_module in
-
-  (* let sprintf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t; L.i32_type i32_t; L.pointer_type i8_t |] in
-  let sprintf_func = L.declare_function "sprintf" sprintf_t the_module in *)
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -163,10 +160,7 @@ let functions =
                    with Not_found -> StringMap.find n global_vars
   in
 
-  (* let is_string s =
-    if L.type_of s = str_t then s else (L.const_inttoptr s str_t)
-  in *)
-
+  (* generate code for different kinds of expressions *)
   let rec expr builder = function
     A.StringLit s -> L.build_global_stringptr s "str" builder
   | A.IntLit i -> L.const_int i32_t i
@@ -204,8 +198,7 @@ let functions =
           A.StringLit test -> L.build_call print_func [| (expr builder s) |] "print" builder
         | A.Id test ->
           let ptr_32 = L.pointer_type i32_t
-          and ptr_bool = L.pointer_type i1_t
-          in
+          and ptr_bool = L.pointer_type i1_t in
           let test_type = L.type_of (lookup test) in
           if ((test_type = ptr_32) || (test_type = ptr_bool)) then
             L.build_call printf_func [| int_format_str ; (expr builder s) |] "printf" builder
@@ -217,8 +210,7 @@ let functions =
           A.StringLit test -> L.build_call println_func [| (expr builder s) |] "println" builder
         | A.Id test ->
           let ptr_32 = L.pointer_type i32_t
-          and ptr_bool = L.pointer_type i1_t
-          in
+          and ptr_bool = L.pointer_type i1_t in
           let test_type = L.type_of (lookup test) in
           if ((test_type = ptr_32) || (test_type = ptr_bool)) then
             L.build_call printf_func [| int_format_str_ln ; (expr builder s) |] "print" builder
@@ -241,6 +233,7 @@ let functions =
       | None -> ignore (f builder)
     in
 
+    (* generate code for different kinds of statements *)
     let rec stmt builder = function
       A.Block sl -> List.fold_left stmt builder sl
     | A.Expr e -> ignore(expr builder e); builder
@@ -277,8 +270,6 @@ let functions =
       let merge_bb = L.append_block context "merge" the_function in
       ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
       L.builder_at_end context merge_bb
-
-      (* | A.For (e1, e2, e3, body) -> stmt builder ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] ) *)
   in
 
    (* Build the code for each statement in the function *)

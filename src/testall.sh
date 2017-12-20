@@ -4,6 +4,7 @@
 # Step through a list of files
 #  Compile, run, and check the output of each expected-to-work test
 #  Compile and check the error of each expected-to-fail test
+# Written by Ashley Nguyen and Jordan Lee
 
 # Path to the LLVM interpreter
 LLI="lli"

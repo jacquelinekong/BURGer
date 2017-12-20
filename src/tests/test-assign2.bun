@@ -1,12 +1,3 @@
-/*string butterfly;
-butterfly = "monarch";
-bool pretty;
-pretty = true;
-
-print(butterfly);
-println(" butterflies are pretty if this prints 1: ");
-println(pretty);*/
-
 string butterfly = "monarch";
 bool pretty = true;
 print(butterfly);

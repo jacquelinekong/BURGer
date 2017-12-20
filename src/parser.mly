@@ -18,7 +18,7 @@
 %token AND OR NOT
 %token IF ELSE NOELSE
 %token TRUE FALSE
-%token INT CHAR STRING BOOL NULL
+%token INT STRING BOOL NULL
 %token WHILE DEF RETURN
 %token EOF
 
@@ -54,7 +54,6 @@ item:
 typ:
     INT                    { Int }
   | BOOL                   { Bool }
-  | CHAR                   { Char }
   | STRING                 { String }
   | NULL                   { Null }
 
@@ -77,7 +76,7 @@ stmt_list:
 /*** Expressions ***/
 
 expr:
-    MINUS expr                     { Unop(Neg, $2) }
+    MINUS expr                    { Unop(Neg, $2) }
   | NOT expr                      { Unop(Not, $2) }
   | ID ASSIGN expr                { Assign($1, $3) }
   | expr PLUS   expr              { Binop($1, Add,   $3) }
@@ -100,11 +99,6 @@ expr:
   | STRINGLIT                     { StringLit($1) }
   | LPAREN expr RPAREN            { $2 }
   | ID LPAREN actuals_opt RPAREN  { Call($1, $3) }
-
-/*** Lists ***/
-/* atom_list:
-    atom COMMA atom { [] }
-  | atom_list COMMA atom { [] } */
 
 /*** Variable Declarations ***/
 

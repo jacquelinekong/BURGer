@@ -1,3 +1,0 @@
-def null what(null x){
-	print("wtf");
-	}

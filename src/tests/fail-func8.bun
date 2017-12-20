@@ -1,3 +1,3 @@
-def null printf(){
-	print("what");
-	}
+def null what(null x){
+	print("wtf");
+}
